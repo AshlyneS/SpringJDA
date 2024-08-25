@@ -1,0 +1,29 @@
+{
+	"properties": [
+		{
+			"name": "spring-jda",
+			"type": "net.foxgenesis.springJDA.autoconfigure.SpringJDAConfiguration",
+			"description": "Configuration for SpringJDA"
+		},
+		{
+			"name": "spring-jda.annotation-configuration",
+			"type": "java.lang.String",
+			"description": "Enable the use of annotations to configure the SpringJDA context"
+		},
+		{
+			"name": "spring-jda.use-sharding",
+			"type": "java.lang.String",
+			"description": "Declare if the SpringJDA context should have shard support"
+		},
+		{
+			"name": "spring-jda.event-auto-register",
+			"type": "java.lang.String",
+			"description": "Enable the auto registration of all EventListener/ListenerAdapter beans"
+		},
+		{
+			"name": "spring-jda.token",
+			"type": "java.lang.String",
+			"description": "Discord bot token to login into Discord with"
+		}
+	]
+}
