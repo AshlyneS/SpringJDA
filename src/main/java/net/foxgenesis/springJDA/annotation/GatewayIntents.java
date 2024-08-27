@@ -11,6 +11,8 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+
+@ContextConfiguration
 public @interface GatewayIntents {
 
 	GatewayIntent[] value();

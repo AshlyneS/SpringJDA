@@ -11,6 +11,8 @@ import net.foxgenesis.springJDA.Scope;
 @Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+
+@ContextConfiguration
 public @interface Scopes {
 
 	Scope[] value();

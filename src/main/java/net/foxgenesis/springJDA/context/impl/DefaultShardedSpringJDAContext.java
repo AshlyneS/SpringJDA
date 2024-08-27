@@ -27,7 +27,6 @@ import net.dv8tion.jda.api.utils.Compression;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.SessionController;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import net.foxgenesis.springJDA.ShardedSpringJDA;
 import net.foxgenesis.springJDA.context.ShardedSpringJDAContext;
 import net.foxgenesis.springJDA.impl.DefaultShardedSpringJDA;
 import okhttp3.OkHttpClient;
@@ -471,7 +470,7 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 	}
 
 	@Override
-	public ShardedSpringJDA createSpringJDA() throws BeansException {
+	public DefaultShardedSpringJDA createSpringJDA() throws BeansException {
 		return new DefaultShardedSpringJDA(builder.build(false));
 	}
 }

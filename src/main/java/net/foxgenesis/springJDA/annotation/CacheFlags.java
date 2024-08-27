@@ -11,6 +11,8 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+
+@ContextConfiguration
 public @interface CacheFlags {
 
 	CacheFlag[] value();

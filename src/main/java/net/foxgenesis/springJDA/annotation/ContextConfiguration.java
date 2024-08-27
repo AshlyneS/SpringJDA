@@ -6,14 +6,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import net.dv8tion.jda.api.Permission;
-
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+public @interface ContextConfiguration {
 
-@ContextConfiguration
-public @interface Permissions {
-
-	Permission[] value();
 }

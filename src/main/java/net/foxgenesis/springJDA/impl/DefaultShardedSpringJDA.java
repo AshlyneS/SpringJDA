@@ -4,13 +4,7 @@ import java.util.Objects;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.function.IntFunction;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.context.SmartLifecycle;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDA.Status;
@@ -20,8 +14,6 @@ import net.dv8tion.jda.api.utils.Once.Builder;
 import net.dv8tion.jda.api.utils.cache.ShardCacheView;
 import net.foxgenesis.springJDA.ShardedSpringJDA;
 import net.foxgenesis.springJDA.event.AllShardsCreatedEvent;
-import net.foxgenesis.springJDA.event.SpringJDAReadyEvent;
-import net.foxgenesis.springJDA.event.SpringJDASemiReadyEvent;
 
 /**
  * Default implementation of {@link ShardedSpringJDA}.
@@ -29,26 +21,18 @@ import net.foxgenesis.springJDA.event.SpringJDASemiReadyEvent;
  * @author Ashley
  * @see ShardedSpringJDA
  */
-public class DefaultShardedSpringJDA implements ShardedSpringJDA, SmartLifecycle, AutoCloseable, ApplicationEventPublisherAware {
-	private final Logger logger = LoggerFactory.getLogger(ShardedSpringJDA.class);
-	
-	private ApplicationEventPublisher publisher;
-	
-	private ShardManager manager;
-
-	public DefaultShardedSpringJDA(ObjectFactory<ShardManager> factory) {
-		this(factory.getObject());
-	}
+public class DefaultShardedSpringJDA extends AbstractSpringJDA implements ShardedSpringJDA {
+	protected ShardManager manager;
 
 	public DefaultShardedSpringJDA(ShardManager manager) {
 		this.manager = Objects.requireNonNull(manager);
 	}
 
 	@Override
-	public void start() {
+	public void startJDA() {
 		if (manager == null)
 			throw new RejectedExecutionException("SpringJDA is already shutdown");
-
+		
 		if (isRunning()) {
 			logger.info("Restarting all shards");
 			manager.restart();
@@ -56,17 +40,14 @@ public class DefaultShardedSpringJDA implements ShardedSpringJDA, SmartLifecycle
 			logger.info("Starting all shards");
 			manager.login();
 		}
-		
-		while(!isRunning()) {
-			Thread.onSpinWait();
-		}
-		
-		publisher.publishEvent(new SpringJDASemiReadyEvent(this));
-		
+	}
+	
+	@Override
+	protected void awaitReady() {
 		while (manager.getShardsRunning() < manager.getShardsTotal()) {
 			Thread.onSpinWait();
 		}
-		
+
 		publisher.publishEvent(new AllShardsCreatedEvent(this));
 
 		logger.info("Waiting for all shards to be ready");
@@ -78,9 +59,6 @@ public class DefaultShardedSpringJDA implements ShardedSpringJDA, SmartLifecycle
 				throw new BeanCreationException("Failed to start SpringJDA", e);
 			}
 		}
-		
-		logger.info("All shards ready");
-		publisher.publishEvent(new SpringJDAReadyEvent(this));
 	}
 
 	@Override
@@ -98,18 +76,13 @@ public class DefaultShardedSpringJDA implements ShardedSpringJDA, SmartLifecycle
 			return false;
 		return manager.getShardsRunning() > 0;
 	}
-	
+
 	@Override
 	public void close() throws Exception {
 		if (isRunning()) {
 			logger.info("Force closing");
 			manager.shutdown();
 		}
-	}
-	
-	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-		this.publisher = applicationEventPublisher;
 	}
 
 	@Override
@@ -128,7 +101,7 @@ public class DefaultShardedSpringJDA implements ShardedSpringJDA, SmartLifecycle
 	}
 
 	@Override
-	public boolean isShuttingDown() {
+	public boolean isValid() {
 		return manager == null ? true
 				: getShardCache().stream().map(JDA::getStatus)
 						.allMatch(status -> status == Status.SHUTDOWN || status == Status.SHUTTING_DOWN);
@@ -136,6 +109,7 @@ public class DefaultShardedSpringJDA implements ShardedSpringJDA, SmartLifecycle
 
 	@Override
 	public <E extends GenericEvent> Builder<E> listenOnce(Class<E> eventType) {
-		throw new UnsupportedOperationException("Listen once not supporeted in shard manager. Please use the method from the shard itself");
+		throw new UnsupportedOperationException(
+				"Listen once not supporeted in shard manager. Please use the method from the shard itself");
 	}
 }

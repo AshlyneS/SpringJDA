@@ -1,5 +1,7 @@
 package net.foxgenesis.springJDA.autoconfigure;
 
+import static net.foxgenesis.springJDA.SpringJDA.SPRING_JDA;
+
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -8,17 +10,18 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.env.Environment;
+import org.springframework.core.metrics.ApplicationStartup;
+import org.springframework.core.metrics.StartupStep;
 import org.springframework.util.Assert;
 
 import net.dv8tion.jda.api.JDA;
@@ -44,17 +47,13 @@ import net.foxgenesis.springJDA.provider.ScopeProvider;
 @ConditionalOnClass(JDA.class)
 @Import(CommandRegistryImpl.class)
 public class SpringJDAAutoConfiguration {
-	public static final String SPRING_JDA = "spring-jda";
 	public static final String PROPERTY_USE_SHARDING = SPRING_JDA + ".use-sharding";
-	public static final String PROPERTY_AUTO_REGISTER = SPRING_JDA + ".event-auto-register";
-	public static final String PROPERTY_ANNOTATION_CONFIGURATION = SPRING_JDA + ".annotation-configuration";
 
 	public static final String PERMISSIONS_BEAN_NAME = SPRING_JDA + ".permissions";
-	public static final String SCOPES_BEAN_NAME = SPRING_JDA + ".scopes";
 
 	private static final String TOKEN_PROPERTY_KEY = SPRING_JDA + ".token";
 
-	private static final Logger log = LoggerFactory.getLogger(SpringJDAAutoConfiguration.class);
+	private static final Logger log = LoggerFactory.getLogger(SpringJDA.class);
 
 	@Lazy
 	@Bean
@@ -79,6 +78,7 @@ public class SpringJDAAutoConfiguration {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	SpringJDA defaultJDA(AbstractSpringJDAContext context, ObjectProvider<SpringJDAInitializer> inits) {
 		log.info("Configuring SpringJDA context");
+		StartupStep create = ApplicationStartup.DEFAULT.start("SpringJDA.create");
 		for (SpringJDAInitializer initializer : inits) {
 			Class<?> requiredType = GenericTypeResolver.resolveTypeArgument(initializer.getClass(),
 					SpringJDAInitializer.class);
@@ -86,44 +86,32 @@ public class SpringJDAAutoConfiguration {
 			initializer.initialize(context);
 		}
 		log.info("Finalizing SpringJDA");
-		return context.createSpringJDA();
+		SpringJDA jda = context.createSpringJDA();
+		create.end();
+		return jda;
 	}
 
 	@Bean
-	SpringJDAInitializer<?> beanInitializer(ObjectProvider<Set<GatewayIntent>> intents,
-			ObjectProvider<Set<CacheFlag>> flags) {
+	@org.springframework.context.annotation.Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	SpringJDAInitializer<?> beanInitializer(SpringJDAConfiguration config, ObjectProvider<Set<GatewayIntent>> intents,
+			ObjectProvider<Set<CacheFlag>> flags, ObjectProvider<ScopeProvider> scopes,
+			ObjectProvider<EventListener> eventListeners) {
 		return context -> {
 			intents.forEach(context::enableIntents);
 			flags.forEach(context::enableCache);
-		};
-	}
 
-	@Bean
-	@ConditionalOnBean(EventListener.class)
-	@ConditionalOnProperty(PROPERTY_AUTO_REGISTER)
-	SpringJDAInitializer<?> autoRegisterListeners(ApplicationContext ctx) {
-		Object[] listeners = ctx
-				// Get all EventListener beans
-				.getBeansOfType(EventListener.class)
-				// Get beans
-				.values()
-				// Stream
-				.stream()
-				// Only beans without AutoRegisterExclude
-				.filter(SpringJDAAutoConfiguration::isAutoExcluded)
-				// To array
-				.toArray();
+			if (config.eventAutoRegister()) {
+				Object[] listeners = eventListeners
+						// Stream
+						.stream()
+						// Only beans without AutoRegisterExclude
+						.filter(SpringJDAAutoConfiguration::isAutoExcluded)
+						// To array
+						.toArray();
+				log.info("Adding {} event listeners", listeners.length);
+				context.addEventListeners(listeners);
+			}
 
-		return builder -> {
-			log.info("Adding {} event listeners", listeners.length);
-			builder.addEventListeners(listeners);
-		};
-	}
-
-	@Bean
-	@ConditionalOnBean(ScopeProvider.class)
-	SpringJDAInitializer<?> setScopes(ObjectProvider<ScopeProvider> scopes) {
-		return context -> {
 			List<String> collected = scopes
 					// Stream
 					.stream()

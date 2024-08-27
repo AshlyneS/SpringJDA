@@ -14,11 +14,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.context.SmartLifecycle;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -68,8 +63,6 @@ import net.dv8tion.jda.api.utils.cache.ChannelCacheView;
 import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
 import net.foxgenesis.springJDA.SingleSpringJDA;
-import net.foxgenesis.springJDA.event.SpringJDAReadyEvent;
-import net.foxgenesis.springJDA.event.SpringJDASemiReadyEvent;
 import okhttp3.OkHttpClient;
 
 /**
@@ -78,13 +71,10 @@ import okhttp3.OkHttpClient;
  * @author Ashley
  * @see SingleSpringJDA
  */
-public class DefaultSingleSpringJDA
-		implements SingleSpringJDA, SmartLifecycle, AutoCloseable, ApplicationEventPublisherAware {
-	private Logger logger = LoggerFactory.getLogger(SingleSpringJDA.class);
+public class DefaultSingleSpringJDA extends AbstractSpringJDA implements SingleSpringJDA {
 
 	private final JDABuilder builder;
 
-	private ApplicationEventPublisher publisher;
 	private JDA jda;
 
 	public DefaultSingleSpringJDA(JDABuilder builder) {
@@ -92,22 +82,20 @@ public class DefaultSingleSpringJDA
 	}
 
 	@Override
-	public void start() {
+	protected void startJDA() {
 		if (jda == null) {
 			logger.info("Starting");
 			jda = builder.build();
 		}
-
-		publisher.publishEvent(new SpringJDASemiReadyEvent(this));
-
+	}
+	
+	@Override
+	protected void awaitReady() {
 		try {
 			jda.awaitReady();
-			logger.info("SpringJDA ready");
 		} catch (InterruptedException e) {
 			logger.warn("Interrupted while waiting for JDA to be ready", e);
 		}
-		
-		publisher.publishEvent(new SpringJDAReadyEvent(this));
 	}
 
 	@Override
@@ -131,7 +119,7 @@ public class DefaultSingleSpringJDA
 
 	@Override
 	public boolean isRunning() {
-		return !(jda == null || jda.getStatus() == Status.SHUTDOWN);
+		return !(jda == null || getStatus() == Status.SHUTDOWN || getStatus() == Status.FAILED_TO_LOGIN);
 	}
 
 	@Override
@@ -147,11 +135,6 @@ public class DefaultSingleSpringJDA
 			}
 			jda = null;
 		}
-	}
-
-	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-		this.publisher = applicationEventPublisher;
 	}
 
 	@Override

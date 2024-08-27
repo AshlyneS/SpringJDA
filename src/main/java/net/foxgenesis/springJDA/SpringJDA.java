@@ -69,6 +69,8 @@ import net.dv8tion.jda.internal.utils.Helpers;
  */
 public interface SpringJDA extends IGuildChannelContainer<Channel> {
 
+	static String SPRING_JDA = "spring-jda";
+
 	/**
 	 * Adds all provided listeners to the event-listeners that will be used to
 	 * handle events.
@@ -1349,5 +1351,5 @@ public interface SpringJDA extends IGuildChannelContainer<Channel> {
 	 * @return {@code true} if this instance is shutting down and should not be
 	 *         operated on
 	 */
-	boolean isShuttingDown();
+	boolean isValid();
 }

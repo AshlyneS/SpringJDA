@@ -685,7 +685,7 @@ public interface SingleSpringJDA extends SpringJDA {
 	}
 	
 	@Override
-	default boolean isShuttingDown() {
+	default boolean isValid() {
 		Status status = getStatus();
 		return status == Status.SHUTDOWN || status == Status.SHUTTING_DOWN;
 	}

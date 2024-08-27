@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -21,7 +22,9 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.foxgenesis.springJDA.Scope;
+import net.foxgenesis.springJDA.SpringJDA;
 import net.foxgenesis.springJDA.annotation.CacheFlags;
+import net.foxgenesis.springJDA.annotation.ContextConfiguration;
 import net.foxgenesis.springJDA.annotation.GatewayIntents;
 import net.foxgenesis.springJDA.annotation.Permissions;
 import net.foxgenesis.springJDA.annotation.Scopes;
@@ -29,50 +32,31 @@ import net.foxgenesis.springJDA.provider.PermissionProvider;
 import net.foxgenesis.springJDA.provider.ScopeProvider;
 
 @net.foxgenesis.springJDA.annotation.SpringJDAAutoConfiguration
-@ConditionalOnProperty(SpringJDAAutoConfiguration.PROPERTY_ANNOTATION_CONFIGURATION)
+@ConditionalOnProperty(SpringJDAAnnotationConfiguration.KEY)
 public class SpringJDAAnnotationConfiguration {
-	public static final String GATEWAY_INTENTS_BEAN_NAME = SpringJDAAutoConfiguration.SPRING_JDA + ".intents";
-	public static final String CACHE_FLAGS_BEAN_NAME = SpringJDAAutoConfiguration.SPRING_JDA + ".flags";
+	private static final String KEY = SpringJDA.SPRING_JDA + ".annotation-configuration";
 
-	private static final Logger log = LoggerFactory.getLogger(SpringJDAAnnotationConfiguration.class);
+	private static final Logger log = LoggerFactory.getLogger(SpringJDA.class);
 
 	@Bean
-	@ConditionalOnBean(annotation = Permissions.class)
-	static BeanFactoryPostProcessor permissionsPostProcessor() {
+	@ConditionalOnBean(annotation = ContextConfiguration.class)
+	@org.springframework.context.annotation.Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	static BeanFactoryPostProcessor annotationPostProcessor() {
 		return factory -> {
 			Set<Permission> permissions = collectAnnotations(factory, Permissions.class, Permissions::value);
-			log.info("Annotation declared permissions: {}", permissions);
-			factory.registerSingleton(SpringJDAAutoConfiguration.PERMISSIONS_BEAN_NAME, PermissionProvider.of(permissions));
-		};
-	}
-	
-	@Bean
-	@ConditionalOnBean(annotation = Scopes.class)
-	static BeanFactoryPostProcessor scopesPostProcessor() {
-		return factory -> {
 			Set<Scope> scopes = collectAnnotations(factory, Scopes.class, Scopes::value);
-			log.info("Annotation declared scopes: {}", scopes);
-			factory.registerSingleton(SpringJDAAutoConfiguration.SCOPES_BEAN_NAME, ScopeProvider.of(scopes));
-		};
-	}
-
-	@Bean
-	@ConditionalOnBean(annotation = GatewayIntents.class)
-	static BeanFactoryPostProcessor gatewayIntentsPostProcessor() {
-		return factory -> {
 			Set<GatewayIntent> intents = collectAnnotations(factory, GatewayIntents.class, GatewayIntents::value);
-			log.info("Annotation declared gateway intents: {}", intents);
-			factory.registerSingleton(GATEWAY_INTENTS_BEAN_NAME, intents);
-		};
-	}
-
-	@Bean
-	@ConditionalOnBean(annotation = CacheFlags.class)
-	static BeanFactoryPostProcessor cacheFlagsPostProcessor() {
-		return factory -> {
 			Set<CacheFlag> flags = collectAnnotations(factory, CacheFlags.class, CacheFlags::value);
+
+			log.info("Annotation declared permissions: {}", permissions);
+			log.info("Annotation declared scopes: {}", scopes);
+			log.info("Annotation declared gateway intents: {}", intents);
 			log.info("Annotation declared cache flags: {}", flags);
-			factory.registerSingleton(CACHE_FLAGS_BEAN_NAME, flags);
+
+			factory.registerSingleton(KEY + ".permissions", PermissionProvider.of(permissions));
+			factory.registerSingleton(KEY + ".scopes", ScopeProvider.of(scopes));
+			factory.registerSingleton(KEY + ".intents", intents);
+			factory.registerSingleton(KEY + ".flags", flags);
 		};
 	}
 
