@@ -23,13 +23,11 @@ import org.springframework.util.Assert;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDA.Status;
-import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.StatusChangeEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.foxgenesis.springJDA.Scope;
 import net.foxgenesis.springJDA.SpringJDA;
@@ -64,8 +62,7 @@ public class SpringJDAAutoConfiguration {
 	@ConditionalOnMissingBean(AbstractSpringJDAContext.class)
 	DefaultShardedSpringJDAContext shardedContext(Environment ev) {
 		log.info("Creating sharding SpringJDA context");
-		return new DefaultShardedSpringJDAContext(
-				DefaultShardManagerBuilder.createLight(ev.getRequiredProperty(TOKEN_PROPERTY_KEY)));
+		return new DefaultShardedSpringJDAContext(ev.getRequiredProperty(TOKEN_PROPERTY_KEY));
 	}
 
 	@Lazy
@@ -74,7 +71,7 @@ public class SpringJDAAutoConfiguration {
 	@ConditionalOnProperty(name = PROPERTY_USE_SHARDING, matchIfMissing = true, havingValue = "false")
 	DefaultSingleSpringJDAContext singleContext(Environment ev) {
 		log.info("Creating single SpringJDA context");
-		return new DefaultSingleSpringJDAContext(JDABuilder.createLight(ev.getRequiredProperty(TOKEN_PROPERTY_KEY)));
+		return new DefaultSingleSpringJDAContext(ev.getRequiredProperty(TOKEN_PROPERTY_KEY));
 	}
 
 	@Bean
@@ -89,7 +86,7 @@ public class SpringJDAAutoConfiguration {
 			initializer.initialize(context);
 		}
 		log.info("Finalizing SpringJDA");
-		return context.getObject();
+		return context.createSpringJDA();
 	}
 
 	@Bean

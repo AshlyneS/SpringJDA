@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.util.Assert;
@@ -39,7 +38,6 @@ public class SpringJDAAnnotationConfiguration {
 
 	@Bean
 	@ConditionalOnBean(annotation = Permissions.class)
-//	@ConditionalOnMissingBean(value = Permission.class, parameterizedContainer = Set.class, name = SpringJDAAutoConfiguration.PERMISSIONS_BEAN_NAME)
 	static BeanFactoryPostProcessor permissionsPostProcessor() {
 		return factory -> {
 			Set<Permission> permissions = collectAnnotations(factory, Permissions.class, Permissions::value);
@@ -50,7 +48,6 @@ public class SpringJDAAnnotationConfiguration {
 	
 	@Bean
 	@ConditionalOnBean(annotation = Scopes.class)
-//	@ConditionalOnMissingBean(value = Scope.class, parameterizedContainer = Set.class, name = SpringJDAAutoConfiguration.SCOPES_BEAN_NAME)
 	static BeanFactoryPostProcessor scopesPostProcessor() {
 		return factory -> {
 			Set<Scope> scopes = collectAnnotations(factory, Scopes.class, Scopes::value);
@@ -61,7 +58,6 @@ public class SpringJDAAnnotationConfiguration {
 
 	@Bean
 	@ConditionalOnBean(annotation = GatewayIntents.class)
-	@ConditionalOnMissingBean(value = GatewayIntent.class, parameterizedContainer = Set.class, name = GATEWAY_INTENTS_BEAN_NAME)
 	static BeanFactoryPostProcessor gatewayIntentsPostProcessor() {
 		return factory -> {
 			Set<GatewayIntent> intents = collectAnnotations(factory, GatewayIntents.class, GatewayIntents::value);
@@ -72,7 +68,6 @@ public class SpringJDAAnnotationConfiguration {
 
 	@Bean
 	@ConditionalOnBean(annotation = CacheFlags.class)
-	@ConditionalOnMissingBean(value = CacheFlag.class, parameterizedContainer = Set.class, name = CACHE_FLAGS_BEAN_NAME)
 	static BeanFactoryPostProcessor cacheFlagsPostProcessor() {
 		return factory -> {
 			Set<CacheFlag> flags = collectAnnotations(factory, CacheFlags.class, CacheFlags::value);

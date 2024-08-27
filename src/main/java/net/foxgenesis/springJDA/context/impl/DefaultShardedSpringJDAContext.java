@@ -1,7 +1,6 @@
 package net.foxgenesis.springJDA.context.impl;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -43,8 +42,9 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 
 	protected final DefaultShardManagerBuilder builder;
 	
-	public DefaultShardedSpringJDAContext(DefaultShardManagerBuilder builder) {
-		this.builder = Objects.requireNonNull(builder);
+	public DefaultShardedSpringJDAContext(String token) {
+		super(token);
+		this.builder = DefaultShardManagerBuilder.createLight(token);
 	}
 
 	@Override
@@ -471,7 +471,7 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 	}
 
 	@Override
-	public ShardedSpringJDA getObject() throws BeansException {
+	public ShardedSpringJDA createSpringJDA() throws BeansException {
 		return new DefaultShardedSpringJDA(builder.build(false));
 	}
 }

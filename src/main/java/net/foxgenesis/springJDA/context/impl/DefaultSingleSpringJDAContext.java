@@ -1,7 +1,6 @@
 package net.foxgenesis.springJDA.context.impl;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -41,8 +40,9 @@ public class DefaultSingleSpringJDAContext extends AbstractSpringJDAContext impl
 	
 	private final JDABuilder builder;
 	
-	public DefaultSingleSpringJDAContext(JDABuilder builder) {
-		this.builder = Objects.requireNonNull(builder);
+	public DefaultSingleSpringJDAContext(String token) {
+		super(token);
+		this.builder = JDABuilder.createLight(token);
 	}
 	
 	@Override
@@ -364,7 +364,7 @@ public class DefaultSingleSpringJDAContext extends AbstractSpringJDAContext impl
 	}
 
 	@Override
-	public SingleSpringJDA getObject() throws BeansException {
+	public SingleSpringJDA createSpringJDA() throws BeansException {
 		return new DefaultSingleSpringJDA(builder);
 	}
 }
