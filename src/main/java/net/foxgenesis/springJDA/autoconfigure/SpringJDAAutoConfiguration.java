@@ -2,6 +2,7 @@ package net.foxgenesis.springJDA.autoconfigure;
 
 import static net.foxgenesis.springJDA.SpringJDA.SPRING_JDA;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -34,7 +36,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.foxgenesis.springJDA.Scope;
 import net.foxgenesis.springJDA.SpringJDA;
-import net.foxgenesis.springJDA.annotation.AutoRegisterExclude;
+import net.foxgenesis.springJDA.annotation.AutoExclude;
 import net.foxgenesis.springJDA.context.SpringJDAInitializer;
 import net.foxgenesis.springJDA.context.impl.AbstractSpringJDAContext;
 import net.foxgenesis.springJDA.context.impl.DefaultShardedSpringJDAContext;
@@ -142,12 +144,14 @@ public class SpringJDAAutoConfiguration {
 
 	@Bean(PERMISSIONS_BEAN_NAME)
 	@ConditionalOnMissingBean(name = PERMISSIONS_BEAN_NAME)
-	Set<Permission> perms(ObjectProvider<PermissionProvider> providers) {
-		Set<Permission> permissions = providers
-				// Stream
-				.stream()
-				// Only beans without AutoRegisterExclude
-				.filter(SpringJDAAutoConfiguration::isAutoExcluded)
+	Set<Permission> perms(ConfigurableListableBeanFactory factory) {
+		Set<Permission> permissions = Arrays
+				// Get all PermissionProvider bean names
+				.stream(factory.getBeanNamesForType(PermissionProvider.class))
+				// Filter out auto excluded beans
+				.filter(name -> isAutoExcluded(factory, name))
+				// Get bean as PermissionProvider
+				.map(name -> factory.getBean(name, PermissionProvider.class))
 				// Join all collections
 				.mapMulti((PermissionProvider provider, Consumer<Permission> mapper) -> {
 					for (Permission permission : provider.getPermissions())
@@ -161,8 +165,12 @@ public class SpringJDAAutoConfiguration {
 		log.info("Discord invite permissions: {}", permissions);
 		return permissions;
 	}
-
+	
 	static boolean isAutoExcluded(Object obj) {
-		return !obj.getClass().isAnnotationPresent(AutoRegisterExclude.class);
+		return obj.getClass().isAnnotationPresent(AutoExclude.class);
+	}
+
+	static boolean isAutoExcluded(ConfigurableListableBeanFactory factory, String bean) {
+		return factory.findAnnotationOnBean(bean, AutoExclude.class, false) != null;
 	}
 }
