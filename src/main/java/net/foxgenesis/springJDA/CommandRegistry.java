@@ -19,7 +19,7 @@ public interface CommandRegistry extends Iterable<Command> {
 				return Optional.of(command);
 		return Optional.empty();
 	}
-	
+
 	default Stream<Command> stream() {
 		return StreamSupport.stream(spliterator(), false);
 	}

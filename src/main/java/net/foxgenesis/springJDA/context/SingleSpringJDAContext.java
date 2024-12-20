@@ -154,7 +154,9 @@ public interface SingleSpringJDAContext extends SpringJDAContext {
 
 	@Override
 	default SingleSpringJDAContext addEventListeners(@NonNull final Collection<Object> listeners) {
-		addEventListeners(listeners.toArray());
+		Object[] toAdd = listeners.toArray();
+		if (toAdd != null)
+			addEventListeners(toAdd);
 		return this;
 	}
 
@@ -163,7 +165,9 @@ public interface SingleSpringJDAContext extends SpringJDAContext {
 
 	@Override
 	default SingleSpringJDAContext removeEventListeners(@NonNull final Collection<Object> listeners) {
-		removeEventListeners(listeners.toArray());
+		Object[] toRemove = listeners.toArray();
+		if (toRemove != null)
+			removeEventListeners(toRemove);
 		return this;
 	}
 

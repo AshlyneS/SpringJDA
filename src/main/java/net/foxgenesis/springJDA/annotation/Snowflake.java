@@ -22,7 +22,7 @@ import jakarta.validation.constraintvalidation.SupportedValidationTarget;
 import jakarta.validation.constraintvalidation.ValidationTarget;
 
 @Documented
-@Constraint(validatedBy = { })
+@Constraint(validatedBy = {})
 @SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
 @Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE })
 @Retention(RUNTIME)
@@ -30,14 +30,16 @@ import jakarta.validation.constraintvalidation.ValidationTarget;
 @Range
 @ReportAsSingleViolation
 public @interface Snowflake {
-	
-	@OverridesAttribute(constraint = Range.class, name = "min") long min() default 10000000000000000L;
 
-	@OverridesAttribute(constraint = Range.class, name = "max") long max() default 9223372036854775807L;
+	@OverridesAttribute(constraint = Range.class, name = "min")
+	long min() default 10000000000000000L;
+
+	@OverridesAttribute(constraint = Range.class, name = "max")
+	long max() default 9223372036854775807L;
 
 	String message() default "{org.hibernate.validator.constraints.Range.message}";
-	
-	Class<?>[] groups() default { };
 
-	Class<? extends Payload>[] payload() default { };
+	Class<?>[] groups() default {};
+
+	Class<? extends Payload>[] payload() default {};
 }

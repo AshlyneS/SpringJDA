@@ -21,6 +21,7 @@ import net.dv8tion.jda.api.hooks.VoiceDispatchInterceptor;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.RestConfig;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
+import net.dv8tion.jda.api.sharding.ShardManager;
 import net.dv8tion.jda.api.sharding.ThreadPoolProvider;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.Compression;
@@ -28,26 +29,26 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.SessionController;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.foxgenesis.springJDA.context.ShardedSpringJDAContext;
-import net.foxgenesis.springJDA.impl.DefaultShardedSpringJDA;
 import okhttp3.OkHttpClient;
 import okhttp3.OkHttpClient.Builder;
 
 /**
  * Default implementation of a {@link ShardedSpringJDAContext}.
+ * 
  * @author Ashley
  * @see ShardedSpringJDAContext
  */
 public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext implements ShardedSpringJDAContext {
 
 	protected final DefaultShardManagerBuilder builder;
-	
-	public DefaultShardedSpringJDAContext(String token) {
+
+	public DefaultShardedSpringJDAContext(@NonNull String token) {
 		super(token);
 		this.builder = DefaultShardManagerBuilder.createLight(token);
 	}
 
 	@Override
-	public ShardedSpringJDAContext setGatewayEncoding(GatewayEncoding encoding) {
+	public ShardedSpringJDAContext setGatewayEncoding(@NonNull GatewayEncoding encoding) {
 		builder.setGatewayEncoding(encoding);
 		return this;
 	}
@@ -65,7 +66,7 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 	}
 
 	@Override
-	public ShardedSpringJDAContext setRestConfig(RestConfig config) {
+	public ShardedSpringJDAContext setRestConfig(@NonNull RestConfig config) {
 		builder.setRestConfig(config);
 		return this;
 	}
@@ -77,43 +78,44 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 	}
 
 	@Override
-	public ShardedSpringJDAContext enableCache(Collection<CacheFlag> flags) {
+	public ShardedSpringJDAContext enableCache(@NonNull Collection<CacheFlag> flags) {
 		builder.enableCache(flags);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext enableCache(CacheFlag flag, CacheFlag... flags) {
+	public ShardedSpringJDAContext enableCache(@NonNull CacheFlag flag, @NonNull CacheFlag... flags) {
 		builder.enableCache(flag, flags);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext disableCache(Collection<CacheFlag> flags) {
+	public ShardedSpringJDAContext disableCache(@NonNull Collection<CacheFlag> flags) {
 		builder.disableCache(flags);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext disableCache(CacheFlag flag, CacheFlag... flags) {
+	public ShardedSpringJDAContext disableCache(@NonNull CacheFlag flag, @NonNull CacheFlag... flags) {
 		builder.disableCache(flag, flags);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setMemberCachePolicy(MemberCachePolicy policy) {
+	public ShardedSpringJDAContext setMemberCachePolicy(@Nullable MemberCachePolicy policy) {
 		builder.setMemberCachePolicy(policy);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setSessionController(SessionController controller) {
+	public ShardedSpringJDAContext setSessionController(@Nullable SessionController controller) {
 		builder.setSessionController(controller);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setContextMap(@Nullable IntFunction<? extends ConcurrentMap<String, String>> provider) {
+	public ShardedSpringJDAContext setContextMap(
+			@Nullable IntFunction<? extends ConcurrentMap<String, String>> provider) {
 		builder.setContextMap(provider);
 		return this;
 	}
@@ -125,7 +127,7 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 	}
 
 	@Override
-	public ShardedSpringJDAContext setCompression(Compression compression) {
+	public ShardedSpringJDAContext setCompression(@NonNull Compression compression) {
 		builder.setCompression(compression);
 		return this;
 	}
@@ -137,31 +139,32 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 	}
 
 	@Override
-	public ShardedSpringJDAContext setHttpClientBuilder(Builder builder) {
+	public ShardedSpringJDAContext setHttpClientBuilder(@Nullable Builder builder) {
 		this.builder.setHttpClientBuilder(builder);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setHttpClient(OkHttpClient client) {
+	public ShardedSpringJDAContext setHttpClient(@Nullable OkHttpClient client) {
 		builder.setHttpClient(client);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setWebsocketFactory(WebSocketFactory factory) {
+	public ShardedSpringJDAContext setWebsocketFactory(@Nullable WebSocketFactory factory) {
 		builder.setWebsocketFactory(factory);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setRateLimitScheduler(ScheduledExecutorService pool) {
+	public ShardedSpringJDAContext setRateLimitScheduler(@Nullable ScheduledExecutorService pool) {
 		builder.setRateLimitScheduler(pool);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setRateLimitScheduler(ScheduledExecutorService pool, boolean automaticShutdown) {
+	public ShardedSpringJDAContext setRateLimitScheduler(@Nullable ScheduledExecutorService pool,
+			boolean automaticShutdown) {
 		builder.setRateLimitScheduler(pool, automaticShutdown);
 		return this;
 	}
@@ -174,13 +177,13 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 	}
 
 	@Override
-	public ShardedSpringJDAContext setRateLimitElastic(ExecutorService pool) {
+	public ShardedSpringJDAContext setRateLimitElastic(@Nullable ExecutorService pool) {
 		builder.setRateLimitElastic(pool);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setRateLimitElastic(ExecutorService pool, boolean automaticShutdown) {
+	public ShardedSpringJDAContext setRateLimitElastic(@Nullable ExecutorService pool, boolean automaticShutdown) {
 		builder.setRateLimitElastic(pool, automaticShutdown);
 		return this;
 	}
@@ -193,13 +196,13 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 	}
 
 	@Override
-	public ShardedSpringJDAContext setGatewayPool(ScheduledExecutorService pool) {
+	public ShardedSpringJDAContext setGatewayPool(@Nullable ScheduledExecutorService pool) {
 		builder.setGatewayPool(pool);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setGatewayPool(ScheduledExecutorService pool, boolean automaticShutdown) {
+	public ShardedSpringJDAContext setGatewayPool(@Nullable ScheduledExecutorService pool, boolean automaticShutdown) {
 		builder.setGatewayPool(pool, automaticShutdown);
 		return this;
 	}
@@ -212,55 +215,58 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 	}
 
 	@Override
-	public ShardedSpringJDAContext setCallbackPool(ExecutorService executor) {
+	public ShardedSpringJDAContext setCallbackPool(@Nullable ExecutorService executor) {
 		builder.setCallbackPool(executor);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setCallbackPool(ExecutorService executor, boolean automaticShutdown) {
+	public ShardedSpringJDAContext setCallbackPool(@Nullable ExecutorService executor, boolean automaticShutdown) {
 		builder.setCallbackPool(executor, automaticShutdown);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setCallbackPoolProvider(@Nullable ThreadPoolProvider<? extends ExecutorService> provider) {
+	public ShardedSpringJDAContext setCallbackPoolProvider(
+			@Nullable ThreadPoolProvider<? extends ExecutorService> provider) {
 		builder.setCallbackPoolProvider(provider);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setEventPool(ExecutorService executor) {
+	public ShardedSpringJDAContext setEventPool(@Nullable ExecutorService executor) {
 		builder.setEventPool(executor);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setEventPool(ExecutorService executor, boolean automaticShutdown) {
+	public ShardedSpringJDAContext setEventPool(@Nullable ExecutorService executor, boolean automaticShutdown) {
 		builder.setEventPool(executor, automaticShutdown);
 		return this;
 	}
-	
+
 	@Override
-	public ShardedSpringJDAContext setEventPoolProvider(@Nullable ThreadPoolProvider<? extends ExecutorService> provider) {
+	public ShardedSpringJDAContext setEventPoolProvider(
+			@Nullable ThreadPoolProvider<? extends ExecutorService> provider) {
 		builder.setEventPoolProvider(provider);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setAudioPool(ScheduledExecutorService pool) {
+	public ShardedSpringJDAContext setAudioPool(@Nullable ScheduledExecutorService pool) {
 		builder.setAudioPool(pool);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setAudioPool(ScheduledExecutorService pool, boolean automaticShutdown) {
+	public ShardedSpringJDAContext setAudioPool(@Nullable ScheduledExecutorService pool, boolean automaticShutdown) {
 		builder.setAudioPool(pool, automaticShutdown);
 		return this;
 	}
-	
+
 	@Override
-	public ShardedSpringJDAContext setAudioPoolProvider(@Nullable ThreadPoolProvider<? extends ScheduledExecutorService> provider) {
+	public ShardedSpringJDAContext setAudioPoolProvider(
+			@Nullable ThreadPoolProvider<? extends ScheduledExecutorService> provider) {
 		builder.setAudioPoolProvider(provider);
 		return this;
 	}
@@ -284,13 +290,14 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 	}
 
 	@Override
-	public ShardedSpringJDAContext setEventManagerProvider(@NonNull final IntFunction<? extends IEventManager> eventManagerProvider) {
+	public ShardedSpringJDAContext setEventManagerProvider(
+			@NonNull final IntFunction<? extends IEventManager> eventManagerProvider) {
 		builder.setEventManagerProvider(eventManagerProvider);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setAudioSendFactory(IAudioSendFactory factory) {
+	public ShardedSpringJDAContext setAudioSendFactory(@Nullable IAudioSendFactory factory) {
 		builder.setAudioSendFactory(factory);
 		return this;
 	}
@@ -300,7 +307,7 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 		builder.setIdle(idle);
 		return this;
 	}
-	
+
 	@Override
 	public ShardedSpringJDAContext setIdleProvider(@Nullable final IntFunction<Boolean> idleProvider) {
 		builder.setIdleProvider(idleProvider);
@@ -308,23 +315,24 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 	}
 
 	@Override
-	public ShardedSpringJDAContext setActivity(Activity activity) {
+	public ShardedSpringJDAContext setActivity(@Nullable Activity activity) {
 		builder.setActivity(activity);
 		return this;
 	}
-	
+
 	@Override
-	public ShardedSpringJDAContext setActivityProvider(@Nullable final IntFunction<? extends Activity> activityProvider) {
+	public ShardedSpringJDAContext setActivityProvider(
+			@Nullable final IntFunction<? extends Activity> activityProvider) {
 		builder.setActivityProvider(activityProvider);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setStatus(OnlineStatus status) {
+	public ShardedSpringJDAContext setStatus(@NonNull OnlineStatus status) {
 		builder.setStatus(status);
 		return this;
 	}
-	
+
 	@Override
 	public ShardedSpringJDAContext setStatusProvider(@Nullable final IntFunction<OnlineStatus> statusProvider) {
 		builder.setStatusProvider(statusProvider);
@@ -332,37 +340,39 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 	}
 
 	@Override
-	public ShardedSpringJDAContext addEventListeners(Object... listeners) {
+	public ShardedSpringJDAContext addEventListeners(@NonNull Object... listeners) {
 		builder.addEventListeners(listeners);
 		return this;
 	}
-	
+
 	@Override
 	public ShardedSpringJDAContext addEventListenerProvider(@NonNull final IntFunction<Object> listenerProvider) {
 		builder.addEventListenerProvider(listenerProvider);
 		return this;
 	}
-	
+
 	@Override
-	public ShardedSpringJDAContext addEventListenerProviders(@NonNull final Collection<IntFunction<Object>> listenerProviders) {
+	public ShardedSpringJDAContext addEventListenerProviders(
+			@NonNull final Collection<IntFunction<Object>> listenerProviders) {
 		builder.addEventListenerProviders(listenerProviders);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext removeEventListeners(Object... listeners) {
+	public ShardedSpringJDAContext removeEventListeners(@NonNull Object... listeners) {
 		builder.removeEventListeners(listeners);
 		return this;
 	}
-	
+
 	@Override
 	public ShardedSpringJDAContext removeEventListenerProvider(@NonNull final IntFunction<Object> listenerProvider) {
 		builder.removeEventListenerProvider(listenerProvider);
 		return this;
 	}
-	
+
 	@Override
-	public ShardedSpringJDAContext removeEventListenerProviders(@NonNull final Collection<IntFunction<Object>> listenerProviders) {
+	public ShardedSpringJDAContext removeEventListenerProviders(
+			@NonNull final Collection<IntFunction<Object>> listenerProviders) {
 		builder.removeEventListenerProviders(listenerProviders);
 		return this;
 	}
@@ -374,25 +384,26 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 	}
 
 	@Override
-	public ShardedSpringJDAContext setVoiceDispatchInterceptor(VoiceDispatchInterceptor interceptor) {
+	public ShardedSpringJDAContext setVoiceDispatchInterceptor(@Nullable VoiceDispatchInterceptor interceptor) {
 		builder.setVoiceDispatchInterceptor(interceptor);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setChunkingFilter(ChunkingFilter filter) {
+	public ShardedSpringJDAContext setChunkingFilter(@Nullable ChunkingFilter filter) {
 		builder.setChunkingFilter(filter);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setDisabledIntents(@NonNull GatewayIntent intent, @NonNull GatewayIntent... intents) {
+	public ShardedSpringJDAContext setDisabledIntents(@NonNull GatewayIntent intent,
+			@NonNull GatewayIntent... intents) {
 		builder.setDisabledIntents(intent, intents);
 		return this;
 	}
 
 	@Override
-	public ShardedSpringJDAContext setDisabledIntents(@NonNull Collection<GatewayIntent> intents) {
+	public ShardedSpringJDAContext setDisabledIntents(@Nullable Collection<GatewayIntent> intents) {
 		builder.setDisabledIntents(intents);
 		return this;
 	}
@@ -416,7 +427,7 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 	}
 
 	@Override
-	public ShardedSpringJDAContext setEnabledIntents(@NonNull Collection<GatewayIntent> intents) {
+	public ShardedSpringJDAContext setEnabledIntents(@Nullable Collection<GatewayIntent> intents) {
 		builder.setEnabledIntents(intents);
 		return this;
 	}
@@ -450,27 +461,27 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 		builder.setShards(shardIds);
 		return this;
 	}
-	
+
 	@Override
 	public ShardedSpringJDAContext setShards(final int minShardId, final int maxShardId) {
 		builder.setShards(minShardId, maxShardId);
 		return this;
 	}
-	
+
 	@Override
 	public ShardedSpringJDAContext setShards(@NonNull Collection<Integer> shardIds) {
 		builder.setShards(shardIds);
 		return this;
 	}
-	
+
 	@Override
 	public ShardedSpringJDAContext setShardsTotal(final int shardsTotal) {
 		builder.setShardsTotal(shardsTotal);
 		return this;
 	}
 
-	@Override
-	public DefaultShardedSpringJDA createSpringJDA() throws BeansException {
-		return new DefaultShardedSpringJDA(builder.build(false));
+	@NonNull
+	public ShardManager build() throws BeansException {
+		return builder.build(false);
 	}
 }

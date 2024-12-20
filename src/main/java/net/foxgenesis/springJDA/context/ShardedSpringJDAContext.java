@@ -207,7 +207,9 @@ public interface ShardedSpringJDAContext extends SpringJDAContext {
 
 	@Override
 	default ShardedSpringJDAContext addEventListeners(@NonNull final Collection<Object> listeners) {
-		addEventListeners(listeners.toArray());
+		Object[] toAdd = listeners.toArray();
+		if (toAdd != null)
+			addEventListeners(toAdd);
 		return this;
 	}
 
@@ -216,7 +218,9 @@ public interface ShardedSpringJDAContext extends SpringJDAContext {
 
 	@Override
 	default ShardedSpringJDAContext removeEventListeners(@NonNull final Collection<Object> listeners) {
-		removeEventListeners(listeners.toArray());
+		Object[] toRemove = listeners.toArray();
+		if (toRemove != null)
+			removeEventListeners(toRemove);
 		return this;
 	}
 

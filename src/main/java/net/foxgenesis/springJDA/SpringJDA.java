@@ -5,13 +5,13 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import net.dv8tion.jda.annotations.Incubating;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
@@ -36,8 +36,6 @@ import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
-import net.dv8tion.jda.api.events.GenericEvent;
-import net.dv8tion.jda.api.hooks.IEventManager;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -48,7 +46,6 @@ import net.dv8tion.jda.api.requests.restaction.CommandEditAction;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import net.dv8tion.jda.api.utils.MiscUtil;
-import net.dv8tion.jda.api.utils.Once;
 import net.dv8tion.jda.api.utils.cache.ChannelCacheView;
 import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
 import net.dv8tion.jda.internal.interactions.CommandDataImpl;
@@ -312,11 +309,12 @@ public interface SpringJDA extends IGuildChannelContainer<Channel> {
 	 *         Guild} instances which have all
 	 *         {@link net.dv8tion.jda.api.entities.User Users} in them.
 	 */
+	@SuppressWarnings("null")
 	@NonNull
 	default List<Guild> getMutualGuilds(@NonNull final Collection<User> users) {
 		Checks.noneNull(users, "users");
 		return this.getGuildCache().stream().filter(guild -> users.stream().allMatch(guild::isMember))
-				.collect(Helpers.toUnmodifiableList());
+				.collect(Collectors.toUnmodifiableList());
 	}
 
 	/**
@@ -331,6 +329,7 @@ public interface SpringJDA extends IGuildChannelContainer<Channel> {
 	 *         {@link net.dv8tion.jda.api.entities.User Users} in them.
 	 */
 	@NonNull
+	@SuppressWarnings("null")
 	default List<Guild> getMutualGuilds(@NonNull final User... users) {
 		Checks.notNull(users, "users");
 		return this.getMutualGuilds(Arrays.asList(users));
@@ -462,6 +461,8 @@ public interface SpringJDA extends IGuildChannelContainer<Channel> {
 		Checks.check(matcher.matches(), "Invalid tag format!");
 		String username = matcher.group(1);
 		String discriminator = matcher.group(2);
+		if (username == null || discriminator == null)
+			throw new IllegalArgumentException("Unable to parse tag");
 		return getUserByTag(username, discriminator);
 	}
 
@@ -520,6 +521,7 @@ public interface SpringJDA extends IGuildChannelContainer<Channel> {
 	 *         PrivateChannels}.
 	 */
 	@NonNull
+
 	default List<PrivateChannel> getPrivateChannels() {
 		return this.getPrivateChannelCache().asList();
 	}
@@ -698,18 +700,21 @@ public interface SpringJDA extends IGuildChannelContainer<Channel> {
 
 	@NonNull
 	@Override
+
 	default SnowflakeCacheView<StageChannel> getStageChannelCache() {
 		return getChannelCache().ofType(StageChannel.class);
 	}
 
 	@NonNull
 	@Override
+
 	default SnowflakeCacheView<ThreadChannel> getThreadChannelCache() {
 		return getChannelCache().ofType(ThreadChannel.class);
 	}
 
 	@NonNull
 	@Override
+
 	default SnowflakeCacheView<ForumChannel> getForumChannelCache() {
 		return getChannelCache().ofType(ForumChannel.class);
 	}
@@ -889,50 +894,6 @@ public interface SpringJDA extends IGuildChannelContainer<Channel> {
 	void setStatus(@Nullable final OnlineStatus status);
 
 	/**
-	 * Returns a reusable builder for a one-time event listener.
-	 *
-	 * <p>
-	 * Note that this method only works if the
-	 * {@link JDABuilder#setEventManager(IEventManager) event manager} is either the
-	 * {@link net.dv8tion.jda.api.hooks.InterfacedEventManager
-	 * InterfacedEventManager} or
-	 * {@link net.dv8tion.jda.api.hooks.AnnotatedEventManager
-	 * AnnotatedEventManager}. <br>
-	 * Other implementations can support it as long as they call
-	 * {@link net.dv8tion.jda.api.hooks.EventListener#onEvent(GenericEvent)
-	 * EventListener.onEvent(GenericEvent)}.
-	 *
-	 * <p>
-	 * <b>Example:</b>
-	 *
-	 * <p>
-	 * Listening to a message from a channel and a user, after using a slash
-	 * command:
-	 * 
-	 * <pre>{@code
-	 * final Duration timeout = Duration.ofSeconds(5);
-	 * event.reply("Reply in " + TimeFormat.RELATIVE.after(timeout) + " if you can!").setEphemeral(true).queue();
-	 *
-	 * event.getJDA().listenOnce(MessageReceivedEvent.class)
-	 * 		.filter(messageEvent -> messageEvent.getChannel().getIdLong() == event.getChannel().getIdLong())
-	 * 		.filter(messageEvent -> messageEvent.getAuthor().getIdLong() == event.getUser().getIdLong())
-	 * 		.timeout(timeout, () -> {
-	 * 			event.getHook().editOriginal("Timeout!").queue();
-	 * 		}).subscribe(messageEvent -> {
-	 * 			event.getHook().editOriginal("You sent: " + messageEvent.getMessage().getContentRaw()).queue();
-	 * 		});
-	 * }</pre>
-	 *
-	 * @param eventType Type of the event to listen to
-	 *
-	 * @throws IllegalArgumentException If the provided event type is {@code null}
-	 *
-	 * @return The one-time event listener builder
-	 */
-	@NonNull
-	<E extends GenericEvent> Once.Builder<E> listenOnce(@NonNull Class<E> eventType);
-
-	/**
 	 * Retrieves the list of global commands. <br>
 	 * This list does not include guild commands! Use
 	 * {@link Guild#retrieveCommands()} for guild commands. <br>
@@ -988,6 +949,7 @@ public interface SpringJDA extends IGuildChannelContainer<Channel> {
 	 *
 	 * @return {@link RestAction} - Type: {@link Command}
 	 */
+	@SuppressWarnings("null")
 	@NonNull
 	default RestAction<Command> retrieveCommandById(long id) {
 		return retrieveCommandById(Long.toUnsignedString(id));
@@ -1122,6 +1084,7 @@ public interface SpringJDA extends IGuildChannelContainer<Channel> {
 	 *
 	 * @return {@link CommandEditAction} used to edit the command
 	 */
+	@SuppressWarnings("null")
 	@NonNull
 	default CommandEditAction editCommandById(long id) {
 		return editCommandById(Long.toUnsignedString(id));
@@ -1156,6 +1119,7 @@ public interface SpringJDA extends IGuildChannelContainer<Channel> {
 	 *
 	 * @return {@link RestAction}
 	 */
+	@SuppressWarnings("null")
 	@NonNull
 	default RestAction<Void> deleteCommandById(long commandId) {
 		return deleteCommandById(Long.toUnsignedString(commandId));
@@ -1262,45 +1226,11 @@ public interface SpringJDA extends IGuildChannelContainer<Channel> {
 	 * @see Guild#retrieveWebhooks()
 	 * @see TextChannel#retrieveWebhooks()
 	 */
+	@SuppressWarnings("null")
 	@NonNull
 	default RestAction<Webhook> retrieveWebhookById(long webhookId) {
 		return retrieveWebhookById(Long.toUnsignedString(webhookId));
 	}
-
-	/**
-	 * Configures the required scopes applied to the
-	 * {@link #getInviteUrl(Permission...)} and similar methods. <br>
-	 * To use slash commands you must add {@code "applications.commands"} to these
-	 * scopes. The scope {@code "bot"} is always applied.
-	 *
-	 * @param scopes The scopes to use with {@link #getInviteUrl(Permission...)} and
-	 *               the likes
-	 *
-	 * @throws IllegalArgumentException If null is provided
-	 *
-	 * @return The current JDA instance
-	 */
-	@NonNull
-	default void setRequiredScopes(@NonNull String... scopes) {
-		Checks.noneNull(scopes, "Scopes");
-		setRequiredScopes(Arrays.asList(scopes));
-	}
-
-	/**
-	 * Configures the required scopes applied to the
-	 * {@link #getInviteUrl(Permission...)} and similar methods. <br>
-	 * To use slash commands you must add {@code "applications.commands"} to these
-	 * scopes. The scope {@code "bot"} is always applied.
-	 *
-	 * @param scopes The scopes to use with {@link #getInviteUrl(Permission...)} and
-	 *               the likes
-	 *
-	 * @throws IllegalArgumentException If null is provided
-	 *
-	 * @return The current JDA instance
-	 */
-	@NonNull
-	void setRequiredScopes(@NonNull Collection<String> scopes);
 
 	/**
 	 * Creates an authorization invite url for the currently logged in Bot-Account.

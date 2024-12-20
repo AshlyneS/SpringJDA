@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 

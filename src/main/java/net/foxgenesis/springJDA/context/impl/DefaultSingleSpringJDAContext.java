@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.springframework.beans.BeansException;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import com.neovisionaries.ws.client.WebSocketFactory;
@@ -25,7 +26,6 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.SessionController;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.foxgenesis.springJDA.context.SingleSpringJDAContext;
-import net.foxgenesis.springJDA.impl.DefaultSingleSpringJDA;
 import okhttp3.OkHttpClient;
 import okhttp3.OkHttpClient.Builder;
 
@@ -36,16 +36,16 @@ import okhttp3.OkHttpClient.Builder;
  * @see SingleSpringJDAContext
  */
 public class DefaultSingleSpringJDAContext extends AbstractSpringJDAContext implements SingleSpringJDAContext {
-	
+
 	private final JDABuilder builder;
-	
-	public DefaultSingleSpringJDAContext(String token) {
+
+	public DefaultSingleSpringJDAContext(@NonNull String token) {
 		super(token);
 		this.builder = JDABuilder.createLight(token);
 	}
-	
+
 	@Override
-	public SingleSpringJDAContext setGatewayEncoding(GatewayEncoding encoding) {
+	public SingleSpringJDAContext setGatewayEncoding(@NonNull GatewayEncoding encoding) {
 		builder.setGatewayEncoding(encoding);
 		return this;
 	}
@@ -63,43 +63,43 @@ public class DefaultSingleSpringJDAContext extends AbstractSpringJDAContext impl
 	}
 
 	@Override
-	public SingleSpringJDAContext setRestConfig(RestConfig config) {
+	public SingleSpringJDAContext setRestConfig(@NonNull RestConfig config) {
 		builder.setRestConfig(config);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext enableCache(Collection<CacheFlag> flags) {
+	public SingleSpringJDAContext enableCache(@NonNull Collection<CacheFlag> flags) {
 		builder.enableCache(flags);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext enableCache(CacheFlag flag, CacheFlag... flags) {
+	public SingleSpringJDAContext enableCache(@NonNull CacheFlag flag, @NonNull CacheFlag... flags) {
 		builder.enableCache(flag, flags);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext disableCache(Collection<CacheFlag> flags) {
+	public SingleSpringJDAContext disableCache(@NonNull Collection<CacheFlag> flags) {
 		builder.disableCache(flags);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext disableCache(CacheFlag flag, CacheFlag... flags) {
+	public SingleSpringJDAContext disableCache(@NonNull CacheFlag flag, @NonNull CacheFlag... flags) {
 		builder.disableCache(flag, flags);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setMemberCachePolicy(MemberCachePolicy policy) {
+	public SingleSpringJDAContext setMemberCachePolicy(@Nullable MemberCachePolicy policy) {
 		builder.setMemberCachePolicy(policy);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setSessionController(SessionController controller) {
+	public SingleSpringJDAContext setSessionController(@Nullable SessionController controller) {
 		builder.setSessionController(controller);
 		return this;
 	}
@@ -109,7 +109,7 @@ public class DefaultSingleSpringJDAContext extends AbstractSpringJDAContext impl
 		builder.setContextEnabled(enable);
 		return this;
 	}
-	
+
 	@Override
 	public SingleSpringJDAContext setContextMap(@Nullable ConcurrentMap<String, String> map) {
 		builder.setContextMap(map);
@@ -117,7 +117,7 @@ public class DefaultSingleSpringJDAContext extends AbstractSpringJDAContext impl
 	}
 
 	@Override
-	public SingleSpringJDAContext setCompression(Compression compression) {
+	public SingleSpringJDAContext setCompression(@NonNull Compression compression) {
 		builder.setCompression(compression);
 		return this;
 	}
@@ -129,91 +129,92 @@ public class DefaultSingleSpringJDAContext extends AbstractSpringJDAContext impl
 	}
 
 	@Override
-	public SingleSpringJDAContext setHttpClientBuilder(Builder builder) {
+	public SingleSpringJDAContext setHttpClientBuilder(@Nullable Builder builder) {
 		this.builder.setHttpClientBuilder(builder);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setHttpClient(OkHttpClient client) {
+	public SingleSpringJDAContext setHttpClient(@Nullable OkHttpClient client) {
 		builder.setHttpClient(client);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setWebsocketFactory(WebSocketFactory factory) {
+	public SingleSpringJDAContext setWebsocketFactory(@Nullable WebSocketFactory factory) {
 		builder.setWebsocketFactory(factory);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setRateLimitScheduler(ScheduledExecutorService pool) {
+	public SingleSpringJDAContext setRateLimitScheduler(@Nullable ScheduledExecutorService pool) {
 		builder.setRateLimitScheduler(pool);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setRateLimitScheduler(ScheduledExecutorService pool, boolean automaticShutdown) {
+	public SingleSpringJDAContext setRateLimitScheduler(@Nullable ScheduledExecutorService pool,
+			boolean automaticShutdown) {
 		builder.setRateLimitScheduler(pool, automaticShutdown);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setRateLimitElastic(ExecutorService pool) {
+	public SingleSpringJDAContext setRateLimitElastic(@Nullable ExecutorService pool) {
 		builder.setRateLimitElastic(pool);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setRateLimitElastic(ExecutorService pool, boolean automaticShutdown) {
+	public SingleSpringJDAContext setRateLimitElastic(@Nullable ExecutorService pool, boolean automaticShutdown) {
 		builder.setRateLimitElastic(pool, automaticShutdown);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setGatewayPool(ScheduledExecutorService pool) {
+	public SingleSpringJDAContext setGatewayPool(@Nullable ScheduledExecutorService pool) {
 		builder.setGatewayPool(pool);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setGatewayPool(ScheduledExecutorService pool, boolean automaticShutdown) {
+	public SingleSpringJDAContext setGatewayPool(@Nullable ScheduledExecutorService pool, boolean automaticShutdown) {
 		builder.setGatewayPool(pool, automaticShutdown);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setCallbackPool(ExecutorService executor) {
+	public SingleSpringJDAContext setCallbackPool(@Nullable ExecutorService executor) {
 		builder.setCallbackPool(executor);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setCallbackPool(ExecutorService executor, boolean automaticShutdown) {
+	public SingleSpringJDAContext setCallbackPool(@Nullable ExecutorService executor, boolean automaticShutdown) {
 		builder.setCallbackPool(executor, automaticShutdown);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setEventPool(ExecutorService executor) {
+	public SingleSpringJDAContext setEventPool(@Nullable ExecutorService executor) {
 		builder.setEventPool(executor);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setEventPool(ExecutorService executor, boolean automaticShutdown) {
+	public SingleSpringJDAContext setEventPool(@Nullable ExecutorService executor, boolean automaticShutdown) {
 		builder.setEventPool(executor, automaticShutdown);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setAudioPool(ScheduledExecutorService pool) {
+	public SingleSpringJDAContext setAudioPool(@Nullable ScheduledExecutorService pool) {
 		builder.setAudioPool(pool);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setAudioPool(ScheduledExecutorService pool, boolean automaticShutdown) {
+	public SingleSpringJDAContext setAudioPool(@Nullable ScheduledExecutorService pool, boolean automaticShutdown) {
 		builder.setAudioPool(pool, automaticShutdown);
 		return this;
 	}
@@ -235,7 +236,7 @@ public class DefaultSingleSpringJDAContext extends AbstractSpringJDAContext impl
 		builder.setAutoReconnect(autoReconnect);
 		return this;
 	}
-	
+
 	@Override
 	public SingleSpringJDAContext setEventManager(@Nullable IEventManager manager) {
 		builder.setEventManager(manager);
@@ -243,7 +244,7 @@ public class DefaultSingleSpringJDAContext extends AbstractSpringJDAContext impl
 	}
 
 	@Override
-	public SingleSpringJDAContext setAudioSendFactory(IAudioSendFactory factory) {
+	public SingleSpringJDAContext setAudioSendFactory(@Nullable IAudioSendFactory factory) {
 		builder.setAudioSendFactory(factory);
 		return this;
 	}
@@ -255,25 +256,25 @@ public class DefaultSingleSpringJDAContext extends AbstractSpringJDAContext impl
 	}
 
 	@Override
-	public SingleSpringJDAContext setActivity(Activity activity) {
+	public SingleSpringJDAContext setActivity(@Nullable Activity activity) {
 		builder.setActivity(activity);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setStatus(OnlineStatus status) {
+	public SingleSpringJDAContext setStatus(@NonNull OnlineStatus status) {
 		builder.setStatus(status);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext addEventListeners(Object... listeners) {
+	public SingleSpringJDAContext addEventListeners(@NonNull Object... listeners) {
 		builder.addEventListeners(listeners);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext removeEventListeners(Object... listeners) {
+	public SingleSpringJDAContext removeEventListeners(@NonNull Object... listeners) {
 		builder.removeEventListeners(listeners);
 		return this;
 	}
@@ -283,7 +284,7 @@ public class DefaultSingleSpringJDAContext extends AbstractSpringJDAContext impl
 		builder.setMaxReconnectDelay(maxReconnectDelay);
 		return this;
 	}
-	
+
 	@Override
 	public SingleSpringJDAContext useSharding(int shardId, int shardTotal) {
 		builder.useSharding(shardId, shardTotal);
@@ -291,61 +292,61 @@ public class DefaultSingleSpringJDAContext extends AbstractSpringJDAContext impl
 	}
 
 	@Override
-	public SingleSpringJDAContext setVoiceDispatchInterceptor(VoiceDispatchInterceptor interceptor) {
+	public SingleSpringJDAContext setVoiceDispatchInterceptor(@Nullable VoiceDispatchInterceptor interceptor) {
 		builder.setVoiceDispatchInterceptor(interceptor);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setChunkingFilter(ChunkingFilter filter) {
+	public SingleSpringJDAContext setChunkingFilter(@Nullable ChunkingFilter filter) {
 		builder.setChunkingFilter(filter);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setDisabledIntents(GatewayIntent intent, GatewayIntent... intents) {
+	public SingleSpringJDAContext setDisabledIntents(@NonNull GatewayIntent intent, @NonNull GatewayIntent... intents) {
 		builder.setDisabledIntents(intent, intents);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setDisabledIntents(Collection<GatewayIntent> intents) {
+	public SingleSpringJDAContext setDisabledIntents(@Nullable Collection<GatewayIntent> intents) {
 		builder.setDisabledIntents(intents);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext disableIntents(Collection<GatewayIntent> intents) {
+	public SingleSpringJDAContext disableIntents(@NonNull Collection<GatewayIntent> intents) {
 		builder.disableIntents(intents);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext disableIntents(GatewayIntent intent, GatewayIntent... intents) {
+	public SingleSpringJDAContext disableIntents(@NonNull GatewayIntent intent, @NonNull GatewayIntent... intents) {
 		builder.disableIntents(intent, intents);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setEnabledIntents(GatewayIntent intent, GatewayIntent... intents) {
+	public SingleSpringJDAContext setEnabledIntents(@NonNull GatewayIntent intent, @NonNull GatewayIntent... intents) {
 		builder.setEnabledIntents(intent, intents);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext setEnabledIntents(Collection<GatewayIntent> intents) {
+	public SingleSpringJDAContext setEnabledIntents(@Nullable Collection<GatewayIntent> intents) {
 		builder.setEnabledIntents(intents);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext enableIntents(Collection<GatewayIntent> intents) {
+	public SingleSpringJDAContext enableIntents(@NonNull Collection<GatewayIntent> intents) {
 		builder.setEnabledIntents(intents);
 		return this;
 	}
 
 	@Override
-	public SingleSpringJDAContext enableIntents(GatewayIntent intent, GatewayIntent... intents) {
+	public SingleSpringJDAContext enableIntents(@NonNull GatewayIntent intent, @NonNull GatewayIntent... intents) {
 		builder.setEnabledIntents(intent, intents);
 		return this;
 	}
@@ -362,8 +363,7 @@ public class DefaultSingleSpringJDAContext extends AbstractSpringJDAContext impl
 		return this;
 	}
 
-	@Override
-	public DefaultSingleSpringJDA createSpringJDA() throws BeansException {
-		return new DefaultSingleSpringJDA(builder);
+	public JDABuilder build() throws BeansException {
+		return builder;
 	}
 }

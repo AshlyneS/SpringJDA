@@ -1,4 +1,4 @@
-package net.foxgenesis.springJDA;
+package net.foxgenesis.springJDA.context;
 
 import org.springframework.util.Assert;
 

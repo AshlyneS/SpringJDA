@@ -1,18 +1,17 @@
 package net.foxgenesis.springJDA;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.IntFunction;
-import java.util.stream.Collectors;
 
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import io.micrometer.common.lang.NonNullFields;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDA.Status;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -45,6 +44,7 @@ import net.dv8tion.jda.api.requests.Route;
 import net.dv8tion.jda.api.requests.restaction.CommandEditAction;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.dv8tion.jda.api.sharding.DefaultShardManager;
+import net.dv8tion.jda.api.sharding.ShardManager;
 import net.dv8tion.jda.api.utils.cache.CacheView;
 import net.dv8tion.jda.api.utils.cache.ChannelCacheView;
 import net.dv8tion.jda.api.utils.cache.ShardCacheView;
@@ -56,12 +56,14 @@ import net.dv8tion.jda.internal.utils.Checks;
 import net.dv8tion.jda.internal.utils.cache.UnifiedChannelCacheView;
 
 /**
- * Interface containing proxy methods for interacting with a wrapped {@link ShardManager}
- * instance.
+ * Interface containing proxy methods for interacting with a wrapped
+ * {@link ShardManager} instance.
+ * 
  * @author Ashley
  * @see SpringJDA
  * @see SingleSpringJDA
  */
+@NonNullFields
 public interface ShardedSpringJDA extends SpringJDA {
 
 	/**
@@ -98,7 +100,7 @@ public interface ShardedSpringJDA extends SpringJDA {
 		Checks.noneNull(listeners, "listeners");
 		this.getShardCache().forEach(jda -> jda.removeEventListener(listeners));
 	}
-	
+
 	@Override
 	default User getSelfUser() {
 		return anyShard().getSelfUser();
@@ -199,6 +201,7 @@ public interface ShardedSpringJDA extends SpringJDA {
 	 */
 	@NonNull
 	@Override
+	@SuppressWarnings("null")
 	default EnumSet<GatewayIntent> getGatewayIntents() {
 		// noinspection ConstantConditions
 		return getShardCache().applyStream(
@@ -577,8 +580,10 @@ public interface ShardedSpringJDA extends SpringJDA {
 	 */
 	@NonNull
 	default Map<JDA, Status> getStatuses() {
-		return Collections.unmodifiableMap(
-				this.getShardCache().stream().collect(Collectors.toMap(Function.identity(), JDA::getStatus)));
+		Map<JDA, Status> out = new HashMap<>();
+		for (JDA jda : getShardCache())
+			out.put(jda, jda.getStatus());
+		return out;
 	}
 
 	/**
@@ -761,59 +766,64 @@ public interface ShardedSpringJDA extends SpringJDA {
 				.setStatus(statusProvider == null ? null : statusProvider.apply(jda.getShardInfo().getShardId())));
 	}
 
+	@NonNull
 	@Override
 	default RestAction<List<RoleConnectionMetadata>> retrieveRoleConnectionMetadata() {
 		return anyShard().retrieveRoleConnectionMetadata();
 	}
 
+	@NonNull
 	@Override
 	default RestAction<List<RoleConnectionMetadata>> updateRoleConnectionMetadata(
-			Collection<? extends RoleConnectionMetadata> records) {
+			@NonNull Collection<? extends RoleConnectionMetadata> records) {
 		return anyShard().updateRoleConnectionMetadata(records);
 	}
 
+	@NonNull
 	@Override
-	default RestAction<Webhook> retrieveWebhookById(String webhookId) {
+	default RestAction<Webhook> retrieveWebhookById(@NonNull String webhookId) {
 		return anyShard().retrieveWebhookById(getShardsQueued());
 	}
-	
+
+	@NonNull
 	@Override
 	default RestAction<List<Command>> retrieveCommands(boolean withLocalizations) {
 		return anyShard().retrieveCommands(withLocalizations);
 	}
 
+	@NonNull
 	@Override
-	default RestAction<Command> retrieveCommandById(String id) {
+	default RestAction<Command> retrieveCommandById(@NonNull String id) {
 		return anyShard().retrieveCommandById(id);
 	}
 
+	@NonNull
 	@Override
-	default RestAction<Command> upsertCommand(CommandData command) {
+	default RestAction<Command> upsertCommand(@NonNull CommandData command) {
 		return anyShard().upsertCommand(command);
 	}
 
+	@NonNull
 	@Override
 	default CommandListUpdateAction updateCommands() {
 		return anyShard().updateCommands();
 	}
 
+	@NonNull
 	@Override
-	default CommandEditAction editCommandById(String id) {
+	default CommandEditAction editCommandById(@NonNull String id) {
 		return anyShard().editCommandById(id);
 	}
 
+	@NonNull
 	@Override
-	default RestAction<Void> deleteCommandById(String commandId) {
+	default RestAction<Void> deleteCommandById(@NonNull String commandId) {
 		return anyShard().deleteCommandById(getShardsQueued());
 	}
 
+	@NonNull
 	@Override
-	default void setRequiredScopes(Collection<String> scopes) {
-		this.getShardCache().forEach(jda -> jda.setRequiredScopes(scopes));
-	}
-
-	@Override
-	default String getInviteUrl(Collection<Permission> permissions) {
+	default String getInviteUrl(@Nullable Collection<Permission> permissions) {
 		return anyShard().getInviteUrl(permissions);
 	}
 
@@ -823,7 +833,11 @@ public interface ShardedSpringJDA extends SpringJDA {
 	 * @return A random shard
 	 * @throws IllegalStateException if there are no shards active
 	 */
+	@NonNull
 	private JDA anyShard() {
-		return this.getShardCache().stream().findAny().orElseThrow(() -> new IllegalStateException("no active shards"));
+		JDA jda = this.getShardCache().stream().findAny().orElse(null);
+		if (jda == null)
+			throw new IllegalStateException("No shards active");
+		return jda;
 	}
 }

@@ -8,14 +8,15 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDA.ShardInfo;
@@ -63,6 +64,8 @@ import net.dv8tion.jda.api.utils.cache.ChannelCacheView;
 import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
 import net.dv8tion.jda.internal.requests.CompletedRestAction;
 import net.foxgenesis.springJDA.SingleSpringJDA;
+import net.foxgenesis.springJDA.context.SpringJDAInitializer;
+import net.foxgenesis.springJDA.context.impl.DefaultSingleSpringJDAContext;
 import okhttp3.OkHttpClient;
 
 /**
@@ -73,12 +76,26 @@ import okhttp3.OkHttpClient;
  */
 public class DefaultSingleSpringJDA extends AbstractSpringJDA implements SingleSpringJDA {
 
-	private final JDABuilder builder;
+	private final DefaultSingleSpringJDAContext context;
+	
+	private JDABuilder builder;
 
 	private JDA jda;
-
-	public DefaultSingleSpringJDA(JDABuilder builder) {
-		this.builder = Objects.requireNonNull(builder);
+	
+	public DefaultSingleSpringJDA(DefaultSingleSpringJDAContext context) {
+		this.context = context;
+	}
+	
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	protected void preStart() {
+		for (SpringJDAInitializer initializer : ctx.getBeanProvider(SpringJDAInitializer.class)) {
+			Class<?> requiredType = GenericTypeResolver.resolveTypeArgument(initializer.getClass(),
+					SpringJDAInitializer.class);
+			Assert.isInstanceOf(requiredType, context, "Unable to call initializer.");
+			initializer.initialize(context);
+		}
+		this.builder = context.build();
 	}
 
 	@Override
@@ -88,7 +105,7 @@ public class DefaultSingleSpringJDA extends AbstractSpringJDA implements SingleS
 			jda = builder.build();
 		}
 	}
-	
+
 	@Override
 	protected void awaitReady() {
 		try {
@@ -98,8 +115,10 @@ public class DefaultSingleSpringJDA extends AbstractSpringJDA implements SingleS
 		}
 	}
 
+	@SuppressWarnings("null")
 	@Override
 	public void stop() {
+		logger.info("Shutting down SpringJDA");
 		if (jda != null) {
 			jda.shutdown();
 
@@ -115,6 +134,7 @@ public class DefaultSingleSpringJDA extends AbstractSpringJDA implements SingleS
 
 			jda = null;
 		}
+		logger.info("Shutdown complete");
 	}
 
 	@Override
@@ -122,6 +142,7 @@ public class DefaultSingleSpringJDA extends AbstractSpringJDA implements SingleS
 		return !(jda == null || getStatus() == Status.SHUTDOWN || getStatus() == Status.FAILED_TO_LOGIN);
 	}
 
+	@SuppressWarnings("null")
 	@Override
 	public void close() throws Exception {
 		if (jda != null) {
@@ -324,11 +345,13 @@ public class DefaultSingleSpringJDA extends AbstractSpringJDA implements SingleS
 		return jda.getGuildCache();
 	}
 
+	@NonNull
 	@Override
 	public SnowflakeCacheView<Category> getCategoryCache() {
 		return jda.getCategoryCache();
 	}
 
+	@NonNull
 	@Override
 	public ChannelCacheView<Channel> getChannelCache() {
 		return jda.getChannelCache();
@@ -474,12 +497,6 @@ public class DefaultSingleSpringJDA extends AbstractSpringJDA implements SingleS
 
 	@Override
 	@NonNull
-	public void setRequiredScopes(@NonNull Collection<String> scopes) {
-		jda.setRequiredScopes(scopes);
-	}
-
-	@Override
-	@NonNull
 	public String getInviteUrl(@Nullable Collection<Permission> permissions) {
 		return jda.getInviteUrl(permissions);
 	}
@@ -511,8 +528,9 @@ public class DefaultSingleSpringJDA extends AbstractSpringJDA implements SingleS
 		return new CompletedRestAction<>(jda, port);
 	}
 
+	@NonNull
 	@Override
-	public <E extends GenericEvent> Builder<E> listenOnce(Class<E> eventType) {
+	public <E extends GenericEvent> Builder<E> listenOnce(@NonNull Class<E> eventType) {
 		return jda.listenOnce(eventType);
 	}
 }

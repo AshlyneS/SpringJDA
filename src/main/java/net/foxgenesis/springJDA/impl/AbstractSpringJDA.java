@@ -2,8 +2,8 @@ package net.foxgenesis.springJDA.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.core.metrics.ApplicationStartup;
 import org.springframework.core.metrics.StartupStep;
@@ -18,14 +18,17 @@ import net.foxgenesis.springJDA.event.SpringJDASemiReadyEvent;
  * @author Ashley
  */
 public abstract class AbstractSpringJDA
-		implements SpringJDA, SmartLifecycle, AutoCloseable, ApplicationEventPublisherAware {
+		implements SpringJDA, SmartLifecycle, AutoCloseable, ApplicationContextAware {
 	protected final Logger logger = LoggerFactory.getLogger(SpringJDA.class);
 
-	protected ApplicationEventPublisher publisher;
+	protected ApplicationContext ctx;
 
 	@Override
 	public void start() {
 		StartupStep startup = ApplicationStartup.DEFAULT.start("SpringJDA.start");
+		
+		logger.info("Starting SpringJDA");
+		preStart();
 
 		// Start JDA
 		startJDA();
@@ -34,14 +37,16 @@ public abstract class AbstractSpringJDA
 		while (!isRunning())
 			Thread.onSpinWait();
 
-		publisher.publishEvent(new SpringJDASemiReadyEvent(this));
+		ctx.publishEvent(new SpringJDASemiReadyEvent(this));
 
 		// Wait until JDA is fully ready
 		awaitReady();
 
 		startup.end();
-		publisher.publishEvent(new SpringJDAReadyEvent(this));
+		ctx.publishEvent(new SpringJDAReadyEvent(this));
 	}
+	
+	protected abstract void preStart();
 
 	/**
 	 * Start JDA or restart if already running.
@@ -59,8 +64,8 @@ public abstract class AbstractSpringJDA
 	}
 
 	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-		this.publisher = applicationEventPublisher;
+	public void setApplicationContext(ApplicationContext ctx) {
+		this.ctx = ctx;
 	}
 
 }

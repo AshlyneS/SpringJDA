@@ -1,13 +1,13 @@
 package net.foxgenesis.springJDA.context.impl;
 
+import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
-import net.foxgenesis.springJDA.SpringJDAFactory;
 import net.foxgenesis.springJDA.context.SpringJDAContext;
 
-public abstract class AbstractSpringJDAContext implements SpringJDAContext, SpringJDAFactory {
+public abstract class AbstractSpringJDAContext implements SpringJDAContext {
 
-	public AbstractSpringJDAContext(String token) {
+	public AbstractSpringJDAContext(@NonNull String token) {
 		Assert.hasText(token, "Token can not be blank!");
 	}
 }

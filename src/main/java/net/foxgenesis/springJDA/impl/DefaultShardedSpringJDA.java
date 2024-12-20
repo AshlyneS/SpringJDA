@@ -1,18 +1,20 @@
 package net.foxgenesis.springJDA.impl;
 
-import java.util.Objects;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.function.IntFunction;
 
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.core.GenericTypeResolver;
+import org.springframework.lang.NonNull;
+import org.springframework.util.Assert;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDA.Status;
-import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.sharding.ShardManager;
-import net.dv8tion.jda.api.utils.Once.Builder;
 import net.dv8tion.jda.api.utils.cache.ShardCacheView;
 import net.foxgenesis.springJDA.ShardedSpringJDA;
+import net.foxgenesis.springJDA.context.SpringJDAInitializer;
+import net.foxgenesis.springJDA.context.impl.DefaultShardedSpringJDAContext;
 import net.foxgenesis.springJDA.event.AllShardsCreatedEvent;
 
 /**
@@ -22,17 +24,32 @@ import net.foxgenesis.springJDA.event.AllShardsCreatedEvent;
  * @see ShardedSpringJDA
  */
 public class DefaultShardedSpringJDA extends AbstractSpringJDA implements ShardedSpringJDA {
+	
+	private final DefaultShardedSpringJDAContext context;
+	
 	protected ShardManager manager;
-
-	public DefaultShardedSpringJDA(ShardManager manager) {
-		this.manager = Objects.requireNonNull(manager);
+	
+	public DefaultShardedSpringJDA(DefaultShardedSpringJDAContext context) {
+		this.context = context;
+	}
+	
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	protected void preStart() {
+		for (SpringJDAInitializer initializer : ctx.getBeanProvider(SpringJDAInitializer.class)) {
+			Class<?> requiredType = GenericTypeResolver.resolveTypeArgument(initializer.getClass(),
+					SpringJDAInitializer.class);
+			Assert.isInstanceOf(requiredType, context, "Unable to call initializer.");
+			initializer.initialize(context);
+		}
+		this.manager = context.build();
 	}
 
 	@Override
 	public void startJDA() {
 		if (manager == null)
 			throw new RejectedExecutionException("SpringJDA is already shutdown");
-		
+
 		if (isRunning()) {
 			logger.info("Restarting all shards");
 			manager.restart();
@@ -41,14 +58,14 @@ public class DefaultShardedSpringJDA extends AbstractSpringJDA implements Sharde
 			manager.login();
 		}
 	}
-	
+
 	@Override
 	protected void awaitReady() {
 		while (manager.getShardsRunning() < manager.getShardsTotal()) {
 			Thread.onSpinWait();
 		}
 
-		publisher.publishEvent(new AllShardsCreatedEvent(this));
+		ctx.publishEvent(new AllShardsCreatedEvent(this));
 
 		logger.info("Waiting for all shards to be ready");
 		for (JDA jda : manager.getShards()) {
@@ -63,11 +80,13 @@ public class DefaultShardedSpringJDA extends AbstractSpringJDA implements Sharde
 
 	@Override
 	public void stop() {
-		logger.info("Shutting down all shards");
+		logger.info("Shutting down SpringJDA");
 		manager.shutdown();
 		manager = null;
+		logger.info("Shutdown complete");
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public boolean isRunning() {
 		if (manager == null)
@@ -82,6 +101,7 @@ public class DefaultShardedSpringJDA extends AbstractSpringJDA implements Sharde
 		if (isRunning()) {
 			logger.info("Force closing");
 			manager.shutdown();
+			manager = null;
 		}
 	}
 
@@ -90,26 +110,21 @@ public class DefaultShardedSpringJDA extends AbstractSpringJDA implements Sharde
 		return manager.getShardsQueued();
 	}
 
+	@NonNull
 	@Override
 	public ShardCacheView getShardCache() {
 		return manager.getShardCache();
 	}
 
 	@Override
-	public void removeEventListenerProvider(IntFunction<Object> eventListenerProvider) {
+	public void removeEventListenerProvider(@NonNull IntFunction<Object> eventListenerProvider) {
 		manager.removeEventListenerProvider(eventListenerProvider);
 	}
 
 	@Override
 	public boolean isValid() {
-		return manager == null ? true
+		return !(manager == null ? true
 				: getShardCache().stream().map(JDA::getStatus)
-						.allMatch(status -> status == Status.SHUTDOWN || status == Status.SHUTTING_DOWN);
-	}
-
-	@Override
-	public <E extends GenericEvent> Builder<E> listenOnce(Class<E> eventType) {
-		throw new UnsupportedOperationException(
-				"Listen once not supporeted in shard manager. Please use the method from the shard itself");
+						.allMatch(status -> status == Status.SHUTDOWN || status == Status.SHUTTING_DOWN));
 	}
 }

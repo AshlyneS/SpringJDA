@@ -14,6 +14,7 @@ import org.springframework.lang.Nullable;
 
 import net.dv8tion.jda.api.JDA.ShardInfo;
 import net.dv8tion.jda.api.JDA.Status;
+import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Entitlement;
@@ -30,6 +31,7 @@ import net.dv8tion.jda.api.entities.sticker.StickerItem;
 import net.dv8tion.jda.api.entities.sticker.StickerPack;
 import net.dv8tion.jda.api.entities.sticker.StickerSnowflake;
 import net.dv8tion.jda.api.entities.sticker.StickerUnion;
+import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.hooks.IEventManager;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.managers.DirectAudioController;
@@ -43,6 +45,7 @@ import net.dv8tion.jda.api.requests.restaction.TestEntitlementCreateAction;
 import net.dv8tion.jda.api.requests.restaction.pagination.EntitlementPaginationAction;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import net.dv8tion.jda.api.utils.MiscUtil;
+import net.dv8tion.jda.api.utils.Once;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.dv8tion.jda.api.utils.cache.CacheView;
 import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
@@ -664,8 +667,52 @@ public interface SingleSpringJDA extends SpringJDA {
 	@NonNull
 	AuditableRestAction<Integer> installAuxiliaryPort();
 
+	/**
+	 * Returns a reusable builder for a one-time event listener.
+	 *
+	 * <p>
+	 * Note that this method only works if the
+	 * {@link JDABuilder#setEventManager(IEventManager) event manager} is either the
+	 * {@link net.dv8tion.jda.api.hooks.InterfacedEventManager
+	 * InterfacedEventManager} or
+	 * {@link net.dv8tion.jda.api.hooks.AnnotatedEventManager
+	 * AnnotatedEventManager}. <br>
+	 * Other implementations can support it as long as they call
+	 * {@link net.dv8tion.jda.api.hooks.EventListener#onEvent(GenericEvent)
+	 * EventListener.onEvent(GenericEvent)}.
+	 *
+	 * <p>
+	 * <b>Example:</b>
+	 *
+	 * <p>
+	 * Listening to a message from a channel and a user, after using a slash
+	 * command:
+	 * 
+	 * <pre>{@code
+	 * final Duration timeout = Duration.ofSeconds(5);
+	 * event.reply("Reply in " + TimeFormat.RELATIVE.after(timeout) + " if you can!").setEphemeral(true).queue();
+	 *
+	 * event.getJDA().listenOnce(MessageReceivedEvent.class)
+	 * 		.filter(messageEvent -> messageEvent.getChannel().getIdLong() == event.getChannel().getIdLong())
+	 * 		.filter(messageEvent -> messageEvent.getAuthor().getIdLong() == event.getUser().getIdLong())
+	 * 		.timeout(timeout, () -> {
+	 * 			event.getHook().editOriginal("Timeout!").queue();
+	 * 		}).subscribe(messageEvent -> {
+	 * 			event.getHook().editOriginal("You sent: " + messageEvent.getMessage().getContentRaw()).queue();
+	 * 		});
+	 * }</pre>
+	 *
+	 * @param eventType Type of the event to listen to
+	 *
+	 * @throws IllegalArgumentException If the provided event type is {@code null}
+	 *
+	 * @return The one-time event listener builder
+	 */
+	@NonNull
+	<E extends GenericEvent> Once.Builder<E> listenOnce(@NonNull Class<E> eventType);
+
 	@Override
-	default void setActivity(Activity activity) {
+	default void setActivity(@Nullable Activity activity) {
 		getPresence().setActivity(activity);
 	}
 
@@ -675,15 +722,15 @@ public interface SingleSpringJDA extends SpringJDA {
 	}
 
 	@Override
-	default void setPresence(OnlineStatus status, Activity activity) {
+	default void setPresence(@Nullable OnlineStatus status, @Nullable Activity activity) {
 		getPresence().setPresence(status, activity);
 	}
 
 	@Override
-	default void setStatus(OnlineStatus status) {
+	default void setStatus(@Nullable OnlineStatus status) {
 		getPresence().setStatus(status);
 	}
-	
+
 	@Override
 	default boolean isValid() {
 		Status status = getStatus();
