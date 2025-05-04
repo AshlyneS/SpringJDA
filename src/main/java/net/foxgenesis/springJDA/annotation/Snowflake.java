@@ -37,7 +37,8 @@ public @interface Snowflake {
 	@OverridesAttribute(constraint = Range.class, name = "max")
 	long max() default 9223372036854775807L;
 
-	String message() default "{org.hibernate.validator.constraints.Range.message}";
+	@OverridesAttribute(constraint = Range.class, name = "message")
+	String message() default "{watame.validation.invalid-snowflake}";
 
 	Class<?>[] groups() default {};
 

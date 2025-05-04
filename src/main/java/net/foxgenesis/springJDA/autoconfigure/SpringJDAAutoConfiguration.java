@@ -26,7 +26,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
@@ -50,7 +49,6 @@ import net.foxgenesis.springJDA.context.Scope;
 import net.foxgenesis.springJDA.context.SpringJDAInitializer;
 import net.foxgenesis.springJDA.context.impl.DefaultShardedSpringJDAContext;
 import net.foxgenesis.springJDA.context.impl.DefaultSingleSpringJDAContext;
-import net.foxgenesis.springJDA.impl.CommandRegistryImpl;
 import net.foxgenesis.springJDA.impl.DefaultShardedSpringJDA;
 import net.foxgenesis.springJDA.impl.DefaultSingleSpringJDA;
 import net.foxgenesis.springJDA.provider.PermissionProvider;
@@ -58,7 +56,6 @@ import net.foxgenesis.springJDA.provider.ScopeProvider;
 
 @AutoConfiguration
 @ConditionalOnClass(JDA.class)
-@Import(CommandRegistryImpl.class)
 @EnableConfigurationProperties(SpringJDAConfiguration.class)
 public class SpringJDAAutoConfiguration {
 	public static final String PROPERTY_USE_SHARDING = SPRING_JDA + ".use-sharding";
@@ -112,6 +109,7 @@ public class SpringJDAAutoConfiguration {
 					public void onStatusChange(@NonNull StatusChangeEvent event) {
 						if (event.getNewStatus() == Status.INITIALIZED) {
 							event.getJDA().setRequiredScopes(collected);
+							event.getJDA().removeEventListener(this);
 						}
 					}
 				});
@@ -143,7 +141,7 @@ public class SpringJDAAutoConfiguration {
 	static BeanFactoryPostProcessor annotationPostProcessor() {
 		return factory -> {
 			log.info("Scanning for JDA context annotations");
-			
+
 			String KEY = SpringJDA.SPRING_JDA + ".annotation-configuration";
 			Set<Permission> permissions = collectAnnotations(factory, Permissions.class, Permissions::value);
 			Set<Scope> scopes = collectAnnotations(factory, Scopes.class, Scopes::value);
