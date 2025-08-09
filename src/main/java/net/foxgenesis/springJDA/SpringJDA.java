@@ -37,6 +37,7 @@ import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
 import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.Command.Type;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -1070,7 +1071,7 @@ public interface SpringJDA extends IGuildChannelContainer<Channel> {
 	 * @return {@link CommandEditAction} used to edit the command
 	 */
 	@NonNull
-	CommandEditAction editCommandById(@NonNull String id);
+	CommandEditAction editCommandById(@NonNull Type type, @NonNull String id);
 
 	/**
 	 * Edit an existing global command by id.
@@ -1086,8 +1087,8 @@ public interface SpringJDA extends IGuildChannelContainer<Channel> {
 	 */
 	@SuppressWarnings("null")
 	@NonNull
-	default CommandEditAction editCommandById(long id) {
-		return editCommandById(Long.toUnsignedString(id));
+	default CommandEditAction editCommandById(@NonNull Type type, long id) {
+		return editCommandById(type, Long.toUnsignedString(id));
 	}
 
 	/**

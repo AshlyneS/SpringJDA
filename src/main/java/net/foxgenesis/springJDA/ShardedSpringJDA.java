@@ -37,6 +37,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
 import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.Command.Type;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -811,14 +812,14 @@ public interface ShardedSpringJDA extends SpringJDA {
 
 	@NonNull
 	@Override
-	default CommandEditAction editCommandById(@NonNull String id) {
-		return anyShard().editCommandById(id);
+	default CommandEditAction editCommandById(@NonNull Type type, @NonNull String id) {
+		return anyShard().editCommandById(type, id);
 	}
 
 	@NonNull
 	@Override
 	default RestAction<Void> deleteCommandById(@NonNull String commandId) {
-		return anyShard().deleteCommandById(getShardsQueued());
+		return anyShard().deleteCommandById(commandId);
 	}
 
 	@NonNull

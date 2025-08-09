@@ -43,6 +43,7 @@ import net.dv8tion.jda.api.entities.sticker.StickerUnion;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.hooks.IEventManager;
 import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.Command.Type;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.managers.DirectAudioController;
@@ -274,8 +275,8 @@ public class DefaultSingleSpringJDA extends AbstractSpringJDA implements SingleS
 
 	@Override
 	@NonNull
-	public CommandEditAction editCommandById(@NonNull String id) {
-		return jda.editCommandById(id);
+	public CommandEditAction editCommandById(@NonNull Type type, @NonNull String id) {
+		return jda.editCommandById(type, id);
 	}
 
 	@Override
