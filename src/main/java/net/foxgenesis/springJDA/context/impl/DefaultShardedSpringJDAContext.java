@@ -1,6 +1,7 @@
 package net.foxgenesis.springJDA.context.impl;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -458,6 +459,7 @@ public class DefaultShardedSpringJDAContext extends AbstractSpringJDAContext imp
 
 	@Override
 	public ShardedSpringJDAContext setShards(final int... shardIds) {
+		Objects.requireNonNull(shardIds);
 		builder.setShards(shardIds);
 		return this;
 	}

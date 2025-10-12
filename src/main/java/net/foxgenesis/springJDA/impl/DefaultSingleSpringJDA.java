@@ -26,7 +26,6 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ApplicationInfo;
 import net.dv8tion.jda.api.entities.Entitlement;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Icon;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.RoleConnectionMetadata;
 import net.dv8tion.jda.api.entities.ScheduledEvent;
@@ -54,7 +53,6 @@ import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.api.requests.restaction.CacheRestAction;
 import net.dv8tion.jda.api.requests.restaction.CommandEditAction;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
-import net.dv8tion.jda.api.requests.restaction.GuildAction;
 import net.dv8tion.jda.api.requests.restaction.TestEntitlementCreateAction;
 import net.dv8tion.jda.api.requests.restaction.pagination.EntitlementPaginationAction;
 import net.dv8tion.jda.api.sharding.ShardManager;
@@ -296,18 +294,6 @@ public class DefaultSingleSpringJDA extends AbstractSpringJDA implements SingleS
 	public RestAction<List<RoleConnectionMetadata>> updateRoleConnectionMetadata(
 			@NonNull Collection<? extends RoleConnectionMetadata> records) {
 		return jda.updateRoleConnectionMetadata(records);
-	}
-
-	@Override
-	@NonNull
-	public GuildAction createGuild(@NonNull String name) {
-		return jda.createGuild(name);
-	}
-
-	@Override
-	@NonNull
-	public RestAction<Void> createGuildFromTemplate(@NonNull String code, @NonNull String name, @Nullable Icon icon) {
-		return jda.createGuildFromTemplate(code, name, icon);
 	}
 
 	@Override
