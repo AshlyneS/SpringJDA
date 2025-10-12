@@ -26,7 +26,6 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ApplicationInfo;
 import net.dv8tion.jda.api.entities.Entitlement;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Icon;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.RoleConnectionMetadata;
 import net.dv8tion.jda.api.entities.ScheduledEvent;
@@ -43,6 +42,7 @@ import net.dv8tion.jda.api.entities.sticker.StickerUnion;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.hooks.IEventManager;
 import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.Command.Type;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.managers.DirectAudioController;
@@ -53,7 +53,6 @@ import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.api.requests.restaction.CacheRestAction;
 import net.dv8tion.jda.api.requests.restaction.CommandEditAction;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
-import net.dv8tion.jda.api.requests.restaction.GuildAction;
 import net.dv8tion.jda.api.requests.restaction.TestEntitlementCreateAction;
 import net.dv8tion.jda.api.requests.restaction.pagination.EntitlementPaginationAction;
 import net.dv8tion.jda.api.sharding.ShardManager;
@@ -274,8 +273,8 @@ public class DefaultSingleSpringJDA extends AbstractSpringJDA implements SingleS
 
 	@Override
 	@NonNull
-	public CommandEditAction editCommandById(@NonNull String id) {
-		return jda.editCommandById(id);
+	public CommandEditAction editCommandById(@NonNull Type type, @NonNull String id) {
+		return jda.editCommandById(type, id);
 	}
 
 	@Override
@@ -295,18 +294,6 @@ public class DefaultSingleSpringJDA extends AbstractSpringJDA implements SingleS
 	public RestAction<List<RoleConnectionMetadata>> updateRoleConnectionMetadata(
 			@NonNull Collection<? extends RoleConnectionMetadata> records) {
 		return jda.updateRoleConnectionMetadata(records);
-	}
-
-	@Override
-	@NonNull
-	public GuildAction createGuild(@NonNull String name) {
-		return jda.createGuild(name);
-	}
-
-	@Override
-	@NonNull
-	public RestAction<Void> createGuildFromTemplate(@NonNull String code, @NonNull String name, @Nullable Icon icon) {
-		return jda.createGuildFromTemplate(code, name, icon);
 	}
 
 	@Override

@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDA.ShardInfo;
 import net.dv8tion.jda.api.JDA.Status;
 import net.dv8tion.jda.api.JDABuilder;
@@ -19,7 +20,6 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Entitlement;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Icon;
 import net.dv8tion.jda.api.entities.ScheduledEvent;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
@@ -40,7 +40,6 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.api.requests.restaction.CacheRestAction;
-import net.dv8tion.jda.api.requests.restaction.GuildAction;
 import net.dv8tion.jda.api.requests.restaction.TestEntitlementCreateAction;
 import net.dv8tion.jda.api.requests.restaction.pagination.EntitlementPaginationAction;
 import net.dv8tion.jda.api.sharding.ShardManager;
@@ -247,63 +246,6 @@ public interface SingleSpringJDA extends SpringJDA {
 	 */
 	@NonNull
 	List<Object> getRegisteredListeners();
-
-	/**
-	 * Constructs a new {@link Guild Guild} with the specified name <br>
-	 * Use the returned {@link GuildAction GuildAction} to provide further details
-	 * and settings for the resulting Guild!
-	 *
-	 * <p>
-	 * This RestAction does not provide the resulting Guild! It will be in a
-	 * following {@link net.dv8tion.jda.api.events.guild.GuildJoinEvent
-	 * GuildJoinEvent}.
-	 *
-	 * @param name The name of the resulting guild
-	 *
-	 * @throws java.lang.IllegalStateException    If the currently logged in account
-	 *                                            is in 10 or more guilds
-	 * @throws java.lang.IllegalArgumentException If the provided name is empty,
-	 *                                            {@code null} or not between 2-100
-	 *                                            characters
-	 *
-	 * @return {@link GuildAction GuildAction} <br>
-	 *         Allows for setting various details for the resulting Guild
-	 */
-	@NonNull
-	GuildAction createGuild(@NonNull String name);
-
-	/**
-	 * Constructs a new {@link Guild Guild} from the specified template code.
-	 *
-	 * <p>
-	 * This RestAction does not provide the resulting Guild! It will be in a
-	 * following {@link net.dv8tion.jda.api.events.guild.GuildJoinEvent
-	 * GuildJoinEvent}.
-	 *
-	 * <p>
-	 * Possible {@link net.dv8tion.jda.api.requests.ErrorResponse ErrorResponses}
-	 * include:
-	 * <ul>
-	 * <li>{@link net.dv8tion.jda.api.requests.ErrorResponse#UNKNOWN_GUILD_TEMPLATE
-	 * Unknown Guild Template} <br>
-	 * The template doesn't exist.</li>
-	 * </ul>
-	 *
-	 * @param code The template code to use to create a guild
-	 * @param name The name of the resulting guild
-	 * @param icon The {@link net.dv8tion.jda.api.entities.Icon Icon} to use, or
-	 *             null to use no icon
-	 *
-	 * @throws java.lang.IllegalStateException    If the currently logged in account
-	 *                                            is in 10 or more guilds
-	 * @throws java.lang.IllegalArgumentException If the provided name is empty,
-	 *                                            {@code null} or not between 2-100
-	 *                                            characters
-	 *
-	 * @return {@link net.dv8tion.jda.api.requests.RestAction RestAction}
-	 */
-	@NonNull
-	RestAction<Void> createGuildFromTemplate(@NonNull String code, @NonNull String name, @Nullable Icon icon);
 
 	/**
 	 * {@link net.dv8tion.jda.api.utils.cache.CacheView CacheView} of all cached
