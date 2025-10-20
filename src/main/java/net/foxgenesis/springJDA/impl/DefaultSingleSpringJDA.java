@@ -26,6 +26,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ApplicationInfo;
 import net.dv8tion.jda.api.entities.Entitlement;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Icon;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.RoleConnectionMetadata;
 import net.dv8tion.jda.api.entities.ScheduledEvent;
@@ -35,6 +36,7 @@ import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.entities.emoji.ApplicationEmoji;
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
 import net.dv8tion.jda.api.entities.sticker.StickerPack;
 import net.dv8tion.jda.api.entities.sticker.StickerSnowflake;
@@ -76,15 +78,15 @@ import okhttp3.OkHttpClient;
 public class DefaultSingleSpringJDA extends AbstractSpringJDA implements SingleSpringJDA {
 
 	private final DefaultSingleSpringJDAContext context;
-	
+
 	private JDABuilder builder;
 
 	private JDA jda;
-	
+
 	public DefaultSingleSpringJDA(DefaultSingleSpringJDAContext context) {
 		this.context = context;
 	}
-	
+
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void preStart() {
@@ -519,5 +521,23 @@ public class DefaultSingleSpringJDA extends AbstractSpringJDA implements SingleS
 	@Override
 	public <E extends GenericEvent> Builder<E> listenOnce(@NonNull Class<E> eventType) {
 		return jda.listenOnce(eventType);
+	}
+
+	@Override
+	@NonNull
+	public RestAction<ApplicationEmoji> createApplicationEmoji(@NonNull String name, @NonNull Icon icon) {
+		return jda.createApplicationEmoji(name, icon);
+	}
+
+	@Override
+	@NonNull
+	public RestAction<List<ApplicationEmoji>> retrieveApplicationEmojis() {
+		return jda.retrieveApplicationEmojis();
+	}
+
+	@Override
+	@NonNull
+	public RestAction<ApplicationEmoji> retrieveApplicationEmojiById(@NonNull String emojiId) {
+		return jda.retrieveApplicationEmojiById(emojiId);
 	}
 }

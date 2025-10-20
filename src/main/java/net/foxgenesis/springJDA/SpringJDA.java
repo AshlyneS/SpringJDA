@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
+import org.springframework.lang.CheckReturnValue;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -17,6 +18,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.ApplicationInfo;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Icon;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.RoleConnectionMetadata;
 import net.dv8tion.jda.api.entities.User;
@@ -35,6 +37,8 @@ import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.emoji.ApplicationEmoji;
+import net.dv8tion.jda.api.entities.emoji.CustomEmoji;
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.Command.Type;
@@ -1283,4 +1287,65 @@ public interface SpringJDA extends IGuildChannelContainer<Channel> {
 	 *         operated on
 	 */
 	boolean isValid();
+
+	/**
+	 * Creates a new {@link ApplicationEmoji} for this bot.
+	 *
+	 * <p>
+	 * Note that the bot is limited to
+	 * {@value ApplicationEmoji#MAX_APPLICATION_EMOJIS} Application Emojis (normal
+	 * and animated).
+	 *
+	 * @param name The name for the new emoji
+	 *             (2-{@value CustomEmoji#EMOJI_NAME_MAX_LENGTH} characters)
+	 * @param icon The {@link Icon} for the new emoji
+	 *
+	 * @throws IllegalArgumentException If null is provided or the name is not
+	 *                                  alphanumeric or not between 2 and
+	 *                                  {@value CustomEmoji#EMOJI_NAME_MAX_LENGTH}
+	 *                                  characters long
+	 *
+	 * @return {@link RestAction} - Type: {@link ApplicationEmoji}
+	 */
+	@NonNull
+	@CheckReturnValue
+	RestAction<ApplicationEmoji> createApplicationEmoji(@NonNull String name, @NonNull Icon icon);
+
+	/**
+	 * Retrieves a list of Application Emojis together with their respective
+	 * creators.
+	 *
+	 * @return {@link RestAction RestAction} - Type: List of
+	 *         {@link ApplicationEmoji}
+	 */
+	@NonNull
+	@CheckReturnValue
+	RestAction<List<ApplicationEmoji>> retrieveApplicationEmojis();
+
+	/**
+	 * Retrieves an application emoji together with its respective creator.
+	 *
+	 * @param emojiId The emoji id
+	 *
+	 * @return {@link RestAction RestAction} - Type: {@link ApplicationEmoji}
+	 */
+	@SuppressWarnings("null")
+	@NonNull
+	@CheckReturnValue
+	default RestAction<ApplicationEmoji> retrieveApplicationEmojiById(long emojiId) {
+		return retrieveApplicationEmojiById(Long.toUnsignedString(emojiId));
+	}
+
+	/**
+	 * Retrieves an application emoji together with its respective creator.
+	 *
+	 * @param emojiId The emoji id
+	 *
+	 * @throws IllegalArgumentException If the provided id is not a valid snowflake
+	 *
+	 * @return {@link RestAction RestAction} - Type: {@link ApplicationEmoji}
+	 */
+	@NonNull
+	@CheckReturnValue
+	RestAction<ApplicationEmoji> retrieveApplicationEmojiById(@NonNull String emojiId);
 }

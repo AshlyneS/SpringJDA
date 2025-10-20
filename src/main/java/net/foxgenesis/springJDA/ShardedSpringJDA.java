@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.IntFunction;
 
+import org.springframework.lang.CheckReturnValue;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -19,6 +20,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.ApplicationInfo;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Icon;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.RoleConnectionMetadata;
 import net.dv8tion.jda.api.entities.User;
@@ -35,6 +37,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.entities.emoji.ApplicationEmoji;
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.Command.Type;
@@ -826,6 +829,27 @@ public interface ShardedSpringJDA extends SpringJDA {
 	@Override
 	default String getInviteUrl(@Nullable Collection<Permission> permissions) {
 		return anyShard().getInviteUrl(permissions);
+	}
+
+	@Override
+	@NonNull
+	@CheckReturnValue
+	default RestAction<ApplicationEmoji> createApplicationEmoji(@NonNull String name, @NonNull Icon icon) {
+		return anyShard().createApplicationEmoji(name, icon);
+	}
+
+	@Override
+	@NonNull
+	@CheckReturnValue
+	default RestAction<List<ApplicationEmoji>> retrieveApplicationEmojis() {
+		return anyShard().retrieveApplicationEmojis();
+	}
+
+	@Override
+	@NonNull
+	@CheckReturnValue
+	default RestAction<ApplicationEmoji> retrieveApplicationEmojiById(@NonNull String emojiId) {
+		return anyShard().retrieveApplicationEmojiById(emojiId);
 	}
 
 	/**
